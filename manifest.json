@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "japanese-calendar",
+	"name": "Japanese Calendar",
 	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"minAppVersion": "1.0.0",
+	"description": "日本の祝日・振替休日対応カレンダー。日付クリックでデイリーノートを自動作成。和暦・六曜表示にも対応。",
+	"author": "Koji Okuji",
+	"authorUrl": "https://portfolio.eggsystems.jp",
 	"isDesktopOnly": false
 }

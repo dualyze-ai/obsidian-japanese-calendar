@@ -1,90 +1,66 @@
-# Obsidian Sample Plugin
+# Japanese Calendar
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+日本の祝日・振替休日に対応した Obsidian 用カレンダープラグインです。
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## 機能
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- 日本の祝日・振替休日を赤色で表示（内閣府公式データ）
+- 祝日名をカレンダーセル内に表示
+- 和暦（令和・平成・昭和）表示対応
+- 六曜（大安・仏滅など）表示対応
+- 日付クリックでデイリーノートを自動作成・オープン
+- デイリーノートに祝日 callout を自動挿入
+- 土曜・日曜の色分け表示
+- 前月・翌月の日付も表示
+- Obsidian のライト / ダークテーマに自動追従
 
-## First time developing plugins?
+## インストール方法
 
-Quick starting guide for new plugin devs:
+### コミュニティプラグイン経由（審査通過後）
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+1. Obsidian の設定 → コミュニティプラグイン → 検索
+2. "Japanese Calendar" を検索してインストール
 
-## Releasing new releases
+### 手動インストール
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+最新の [Release](https://github.com/kojiman55/obsidian-japanese-calendar/releases) から
+`main.js` / `manifest.json` / `styles.css` をダウンロードし、
+Vault 内の `.obsidian/plugins/japanese-calendar/` に配置してください。
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## 設定
 
-## Adding your plugin to the community plugin list
+| 設定名 | デフォルト | 説明 |
+|--------|-----------|------|
+| デイリーノートの保存フォルダ | Daily Notes | ノートの保存先フォルダ |
+| ファイル名フォーマット | YYYY-MM-DD | moment.js フォーマット |
+| テンプレートファイルのパス | （空欄） | カスタムテンプレートのパス |
+| 和暦を表示する | ON | ヘッダーに令和〇年を表示 |
+| 祝日名を表示する | ON | セル内に祝日名を表示 |
+| 六曜を表示する | OFF | 大安・仏滅などを表示 |
+| 週の開始曜日 | 日曜日 | 日曜 or 月曜始まり |
+| 祝日を自動挿入する | ON | 祝日のノートに callout を挿入 |
+| ステータスバーに祝日数を表示する | ON | 今月の祝日数を表示 |
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## テンプレート変数
 
-## How to use
+カスタムテンプレートで使用できるプレースホルダー：
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+| 変数 | 説明 |
+|------|------|
+| `{{date}}` | 日付（設定フォーマット） |
+| `{{date:YYYY}}` | 年 |
+| `{{date:MM}}` | 月 |
+| `{{date:DD}}` | 日 |
+| `{{holiday}}` | 祝日名（祝日でない場合は空） |
+| `{{rokuyo}}` | 六曜 |
+| `{{wareki}}` | 和暦（例：令和8年） |
 
-## Manually installing the plugin
+## 技術スタック
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+- TypeScript
+- Obsidian Plugin API
+- [@holiday-jp/holiday_jp](https://github.com/holiday-jp/holiday_jp-js) — 日本の祝日データ（内閣府公式）
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+## ライセンス
 
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
-
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
-
-## API Documentation
-
-See https://docs.obsidian.md
+MIT
