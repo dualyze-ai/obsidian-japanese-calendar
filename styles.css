@@ -1,4 +1,6 @@
-.side-dock-ribbon-action[aria-label="Japanese Calendar"] svg {
+.side-dock-ribbon-action[aria-label="Japanese Calendar"] svg,
+.workspace-leaf-content[data-type="japanese-calendar"] .view-header-icon svg,
+.workspace-tab-header[data-type="japanese-calendar"] .workspace-tab-header-inner-icon svg {
 	color: var(--color-accent);
 	stroke: var(--color-accent);
 }
