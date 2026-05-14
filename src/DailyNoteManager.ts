@@ -70,11 +70,12 @@ export class DailyNoteManager {
 			}
 		}
 
-		let header = `# ${dateStr}`;
-		if (holiday) header += `（${holiday}）`;
-		if (rokuyo) header += `\n> ${rokuyo}`;
+		const lines: string[] = [];
+		if (holiday) lines.push(`> [!note] ${holiday}`);
+		if (rokuyo) lines.push(`> [!info] 六曜：${rokuyo}`);
+		lines.push('', '## 予定', '', '## メモ', '', '## タスク', '- [ ] ', '');
 
-		return `${header}\n\n## 予定\n\n## メモ\n\n## タスク\n- [ ] \n`;
+		return lines.join('\n');
 	}
 
 	private applyTemplate(

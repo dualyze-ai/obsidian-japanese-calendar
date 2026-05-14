@@ -39,7 +39,7 @@ export default class JapaneseCalendarPlugin extends Plugin {
 
 		this.registerView(VIEW_TYPE, leaf => new CalendarView(leaf, this));
 
-		this.addRibbonIcon('calendar', 'Japanese Calendar', () => this.openCalendar());
+		this.addRibbonIcon('calendar-check', 'Japanese Calendar', () => this.openCalendar());
 
 		this.addCommand({
 			id: 'open-calendar',
