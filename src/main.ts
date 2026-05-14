@@ -1,4 +1,4 @@
-import { Plugin, TFile, WorkspaceLeaf } from 'obsidian';
+import { Plugin, TFile } from 'obsidian';
 import { CalendarView, VIEW_TYPE } from './CalendarView';
 import { DailyNoteManager } from './DailyNoteManager';
 import { HolidayManager } from './HolidayManager';
@@ -39,6 +39,7 @@ export default class JapaneseCalendarPlugin extends Plugin {
 
 		this.registerView(VIEW_TYPE, leaf => new CalendarView(leaf, this));
 
+		// eslint-disable-next-line obsidianmd/ui/sentence-case
 		this.addRibbonIcon('calendar-days', 'Japanese Calendar', () => this.openCalendar());
 
 		this.addCommand({
@@ -52,39 +53,37 @@ export default class JapaneseCalendarPlugin extends Plugin {
 			name: '今日のデイリーノートを開く',
 			callback: () => {
 				const mgr = new DailyNoteManager(this.app, this.settings);
-				mgr.openOrCreate(new Date());
+				void mgr.openOrCreate(new Date());
 			},
 		});
 
 		if (this.settings.showStatusBar) {
 			this.statusBarItem = this.addStatusBarItem();
-			this.updateStatusBar();
+			void this.updateStatusBar();
 		}
 
 		this.registerEvent(
 			this.app.workspace.on('file-open', file => {
-				if (file) this.onFileOpen(file);
+				if (file) void this.onFileOpen(file);
 			})
 		);
 
 		this.addSettingTab(new JapaneseCalendarSettingTab(this.app, this));
 	}
 
-	async onunload() {
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE);
-	}
+	onunload() {}
 
 	async openCalendar() {
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
 		const existing = leaves[0];
 		if (existing) {
-			this.app.workspace.revealLeaf(existing);
+			await this.app.workspace.revealLeaf(existing);
 			return;
 		}
 		const leaf = this.app.workspace.getRightLeaf(false);
 		if (!leaf) return;
 		await leaf.setViewState({ type: VIEW_TYPE, active: true });
-		this.app.workspace.revealLeaf(leaf);
+		await this.app.workspace.revealLeaf(leaf);
 	}
 
 	private async onFileOpen(file: TFile) {
@@ -93,8 +92,6 @@ export default class JapaneseCalendarPlugin extends Plugin {
 		const mgr = new DailyNoteManager(this.app, this.settings);
 		const holidays = new HolidayManager();
 
-		// ファイル名がdailyNoteFormatにマッチするか確認
-		const expected = mgr.filePath(new Date(window.moment().format('YYYY-MM-DD')));
 		const nameNoExt = file.basename;
 		const parsed = window.moment(nameNoExt, this.settings.dailyNoteFormat, true);
 		if (!parsed.isValid()) return;
@@ -122,7 +119,7 @@ export default class JapaneseCalendarPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()) as PluginSettings;
 	}
 
 	async saveSettings() {

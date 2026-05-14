@@ -10,12 +10,12 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: 'Japanese Calendar' });
-
 		new Setting(containerEl)
 			.setName('デイリーノートの保存フォルダ')
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc('例：Daily Notes')
 			.addText(t => t
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				.setPlaceholder('Daily Notes')
 				.setValue(this.plugin.settings.dailyNoteFolder)
 				.onChange(async v => {
@@ -25,8 +25,10 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('ファイル名フォーマット')
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc('moment.js フォーマット。例：YYYY-MM-DD')
 			.addText(t => t
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				.setPlaceholder('YYYY-MM-DD')
 				.setValue(this.plugin.settings.dailyNoteFormat)
 				.onChange(async v => {
@@ -45,7 +47,7 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		containerEl.createEl('h3', { text: '表示設定' });
+		new Setting(containerEl).setName('表示設定').setHeading();
 
 		new Setting(containerEl)
 			.setName('和暦を表示する')
@@ -88,7 +90,7 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		containerEl.createEl('h3', { text: 'デイリーノート連携' });
+		new Setting(containerEl).setName('デイリーノート連携').setHeading();
 
 		new Setting(containerEl)
 			.setName('祝日を自動挿入する')

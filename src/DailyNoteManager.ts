@@ -57,8 +57,6 @@ export class DailyNoteManager {
 	}
 
 	private async buildContent(date: Date): Promise<string> {
-		const m = window.moment(date);
-		const dateStr = m.format(this.settings.dailyNoteFormat);
 		const holiday = this.holidays.getHolidayName(date);
 		const rokuyo = this.settings.showRokuyo ? this.holidays.getRokuyo(date) : null;
 

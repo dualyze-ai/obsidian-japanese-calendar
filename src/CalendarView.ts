@@ -1,26 +1,29 @@
-import { ItemView, WorkspaceLeaf } from 'obsidian';
+import { ItemView, WorkspaceLeaf, moment } from 'obsidian';
 import { HolidayManager } from './HolidayManager';
 import { DailyNoteManager } from './DailyNoteManager';
 import { toWareki, getDayLabel } from './utils';
 import type JapaneseCalendarPlugin from './main';
 
+type Moment = ReturnType<typeof moment>;
+
 export const VIEW_TYPE = 'japanese-calendar';
 
 export class CalendarView extends ItemView {
-	private current: moment.Moment;
+	private current: Moment;
 	private holidays: HolidayManager;
 	private notes: DailyNoteManager;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: JapaneseCalendarPlugin) {
 		super(leaf);
-		this.current = window.moment();
+		this.current = moment();
 		this.holidays = new HolidayManager();
 		this.notes = new DailyNoteManager(this.app, this.plugin.settings);
 	}
 
 	getViewType() { return VIEW_TYPE; }
+	// eslint-disable-next-line obsidianmd/ui/sentence-case
 	getDisplayText() { return 'Japanese Calendar'; }
-	getIcon() { return 'calendar'; }
+	getIcon() { return 'calendar-days'; }
 
 	async onOpen() {
 		this.render();
@@ -57,7 +60,7 @@ export class CalendarView extends ItemView {
 			this.render();
 		};
 		nav.createEl('button', { text: '今日', cls: 'jhc-today-btn' }).onclick = () => {
-			this.current = window.moment();
+			this.current = moment();
 			this.render();
 		};
 		nav.createEl('button', { text: '›' }).onclick = () => {
@@ -79,27 +82,23 @@ export class CalendarView extends ItemView {
 
 	private renderDays(root: HTMLElement) {
 		const grid = root.createDiv({ cls: 'jhc-days-grid' });
-		const today = window.moment();
+		const today = moment();
 		const start = this.plugin.settings.weekStart;
 
 		const firstDay = this.current.clone().startOf('month');
 		const lastDay = this.current.clone().endOf('month');
 
-		// 前月の埋め込み日数
 		let offset = (firstDay.day() - start + 7) % 7;
 
-		// 前月の日を表示
 		for (let i = offset - 1; i >= 0; i--) {
 			const d = firstDay.clone().subtract(i + 1, 'day');
 			this.renderCell(grid, d.toDate(), true, today);
 		}
 
-		// 当月の日
 		for (const d = firstDay.clone(); d.isSameOrBefore(lastDay); d.add(1, 'day')) {
 			this.renderCell(grid, d.toDate(), false, today);
 		}
 
-		// 翌月の日（6週に満たない分を補完）
 		const totalCells = offset + lastDay.date();
 		const remaining = (7 - (totalCells % 7)) % 7;
 		for (let i = 1; i <= remaining; i++) {
@@ -108,8 +107,8 @@ export class CalendarView extends ItemView {
 		}
 	}
 
-	private renderCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: moment.Moment) {
-		const m = window.moment(date);
+	private renderCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Moment) {
+		const m = moment(date);
 		const dow = date.getDay();
 		const holidayName = this.holidays.getHolidayName(date);
 		const isToday = m.isSame(today, 'day');
@@ -123,7 +122,7 @@ export class CalendarView extends ItemView {
 
 		const cell = grid.createDiv({ cls: classes.join(' ') });
 
-		const numEl = cell.createDiv({ cls: 'jhc-day-num', text: String(date.getDate()) });
+		cell.createDiv({ cls: 'jhc-day-num', text: String(date.getDate()) });
 
 		if (!otherMonth) {
 			if (holidayName && this.plugin.settings.showHolidayName) {
@@ -162,7 +161,6 @@ export class CalendarView extends ItemView {
 		}
 	}
 
-	// 外部からの更新通知（ノート作成後などに呼ぶ）
 	refresh() {
 		this.notes = new DailyNoteManager(this.app, this.plugin.settings);
 		this.render();
