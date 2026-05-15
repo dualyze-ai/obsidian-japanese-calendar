@@ -12,10 +12,8 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('デイリーノートの保存フォルダ')
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc('例：Daily Notes')
 			.addText(t => t
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				.setPlaceholder('Daily Notes')
 				.setValue(this.plugin.settings.dailyNoteFolder)
 				.onChange(async v => {
@@ -25,10 +23,8 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('ファイル名フォーマット')
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc('moment.js フォーマット。例：YYYY-MM-DD')
 			.addText(t => t
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				.setPlaceholder('YYYY-MM-DD')
 				.setValue(this.plugin.settings.dailyNoteFormat)
 				.onChange(async v => {

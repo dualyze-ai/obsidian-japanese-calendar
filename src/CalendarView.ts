@@ -21,8 +21,7 @@ export class CalendarView extends ItemView {
 	}
 
 	getViewType() { return VIEW_TYPE; }
-	// eslint-disable-next-line obsidianmd/ui/sentence-case
-	getDisplayText() { return 'Japanese Calendar'; }
+	getDisplayText() { return 'Japanese calendar'; }
 	getIcon() { return 'calendar-days'; }
 
 	async onOpen() {

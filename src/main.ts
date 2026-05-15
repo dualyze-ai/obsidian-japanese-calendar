@@ -39,8 +39,7 @@ export default class JapaneseCalendarPlugin extends Plugin {
 
 		this.registerView(VIEW_TYPE, leaf => new CalendarView(leaf, this));
 
-		// eslint-disable-next-line obsidianmd/ui/sentence-case
-		this.addRibbonIcon('calendar-days', 'Japanese Calendar', () => this.openCalendar());
+		this.addRibbonIcon('calendar-days', 'Japanese calendar', () => this.openCalendar());
 
 		this.addCommand({
 			id: 'open-calendar',
