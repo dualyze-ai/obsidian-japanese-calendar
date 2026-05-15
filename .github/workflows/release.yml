@@ -38,5 +38,5 @@ jobs:
           tag="${GITHUB_REF#refs/tags/}"
           gh release create "$tag" \
             --title "$tag" \
-            --generate-notes \
+            --notes "Japanese holiday calendar with wareki (Japanese era), rokuyo, and daily note integration for Obsidian." \
             main.js manifest.json styles.css
