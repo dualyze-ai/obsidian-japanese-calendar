@@ -2,6 +2,18 @@
 
 A calendar plugin for Obsidian with full support for Japanese public holidays, wareki (Japanese era), and rokuyo. Click any date to create or open a daily note automatically.
 
+## Features
+
+- Japanese public holidays highlighted in red (official Cabinet Office data)
+- Holiday names displayed inside calendar cells
+- Wareki (Japanese era: Reiwa, Heisei, Showa) display
+- Rokuyo (Taian, Butsumetsu, etc.) display
+- Click a date to create or open a daily note
+- Automatic holiday callout insertion in daily notes
+- Color-coded weekends (Saturday/Sunday)
+- Previous and next month dates shown
+- Automatically follows Obsidian light/dark theme
+
 ---
 
 日本の祝日・振替休日に対応した Obsidian 用カレンダープラグインです。
