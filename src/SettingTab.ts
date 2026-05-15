@@ -12,9 +12,9 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('デイリーノートの保存フォルダ')
-			.setDesc('例：Daily Notes')
+			.setDesc('例：Daily notes')
 			.addText(t => t
-				.setPlaceholder('Daily Notes')
+				.setPlaceholder('Daily notes')
 				.setValue(this.plugin.settings.dailyNoteFolder)
 				.onChange(async v => {
 					this.plugin.settings.dailyNoteFolder = v;
@@ -23,9 +23,8 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('ファイル名フォーマット')
-			.setDesc('moment.js フォーマット。例：YYYY-MM-DD')
+			.setDesc('Moment.js フォーマット。例：YYYY-MM-DD')
 			.addText(t => t
-				.setPlaceholder('YYYY-MM-DD')
 				.setValue(this.plugin.settings.dailyNoteFormat)
 				.onChange(async v => {
 					this.plugin.settings.dailyNoteFormat = v;
