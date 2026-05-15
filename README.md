@@ -32,9 +32,11 @@ A calendar plugin for Obsidian with full support for Japanese public holidays, w
 
 ## Installation
 
-### Community plugins (pending review)
+### Community plugins
 
-Once approved, search for "Japanese Calendar" in **Settings → Community plugins → Browse**.
+1. Open **Settings → Community plugins → Browse**
+2. Search for "Japanese Calendar"
+3. Click **Install**, then **Enable**
 
 ### Manual installation
 
@@ -44,12 +46,11 @@ Download `main.js`, `manifest.json`, and `styles.css` from the latest [Release](
 
 ## インストール方法
 
-### コミュニティプラグイン経由（申請中）
+### コミュニティプラグイン経由
 
-現在 Obsidian 公式コミュニティプラグインへの掲載を申請中です。審査通過後、以下の手順でインストールできます：
-
-1. Obsidian の設定 → コミュニティプラグイン → 検索
-2. "Japanese Calendar" を検索してインストール
+1. Obsidian の **設定 → コミュニティプラグイン → 検索**
+2. "Japanese Calendar" を検索
+3. **インストール** → **有効化**
 
 ### 手動インストール
 
