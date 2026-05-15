@@ -3,7 +3,7 @@
 	"name": "Japanese Calendar",
 	"version": "1.0.0",
 	"minAppVersion": "1.0.0",
-	"description": "日本の祝日・振替休日対応カレンダー。日付クリックでデイリーノートを自動作成。和暦・六曜表示にも対応。",
+	"description": "Japanese holiday calendar with wareki (Japanese era), rokuyo, and daily note integration.",
 	"author": "Koji Okuji",
 	"authorUrl": "https://portfolio.eggsystems.jp",
 	"isDesktopOnly": false
