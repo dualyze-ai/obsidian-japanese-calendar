@@ -1,5 +1,9 @@
 # Japanese Calendar
 
+A calendar plugin for Obsidian with full support for Japanese public holidays, wareki (Japanese era), and rokuyo. Click any date to create or open a daily note automatically.
+
+---
+
 日本の祝日・振替休日に対応した Obsidian 用カレンダープラグインです。
 
 ## 機能
@@ -13,6 +17,18 @@
 - 土曜・日曜の色分け表示
 - 前月・翌月の日付も表示
 - Obsidian のライト / ダークテーマに自動追従
+
+## Installation
+
+### Community plugins (pending review)
+
+Once approved, search for "Japanese Calendar" in **Settings → Community plugins → Browse**.
+
+### Manual installation
+
+Download `main.js`, `manifest.json`, and `styles.css` from the latest [Release](https://github.com/kojiman55/obsidian-japanese-calendar/releases), then place them in your vault under `.obsidian/plugins/japanese-calendar/`.
+
+---
 
 ## インストール方法
 
