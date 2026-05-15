@@ -1,7 +1,7 @@
 {
 	"id": "japanese-calendar",
 	"name": "Japanese Calendar",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "1.7.2",
 	"description": "Japanese holiday calendar with wareki (Japanese era), rokuyo, and daily note integration.",
 	"author": "Koji Okuji",
