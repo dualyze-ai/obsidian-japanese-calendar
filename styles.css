@@ -54,9 +54,9 @@
 	color: var(--text-normal);
 }
 
-.jhc-today-btn {
-	font-size: 11px !important;
-	padding: 2px 6px !important;
+.jhc-nav .jhc-today-btn {
+	font-size: 11px;
+	padding: 2px 6px;
 }
 
 .jhc-dow-grid {
