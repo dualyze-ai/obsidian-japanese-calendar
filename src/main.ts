@@ -11,6 +11,11 @@ export interface PluginSettings {
 	showWareki: boolean;
 	showHolidayName: boolean;
 	showRokuyo: boolean;
+	showKichijitsu: boolean;
+	showTenshanichi: boolean;
+	showIchiryuManbai: boolean;
+	showFujoju: boolean;
+	showTooltip: boolean;
 	weekStart: 0 | 1;
 	enableAutoInsert: boolean;
 	insertFormat: string;
@@ -24,6 +29,11 @@ const DEFAULT_SETTINGS: PluginSettings = {
 	showWareki: true,
 	showHolidayName: true,
 	showRokuyo: false,
+	showKichijitsu: true,
+	showTenshanichi: true,
+	showIchiryuManbai: true,
+	showFujoju: true,
+	showTooltip: true,
 	weekStart: 0,
 	enableAutoInsert: true,
 	insertFormat: '> [!note] 祝日\n> {name}',

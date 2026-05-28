@@ -75,6 +75,53 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('吉凶日を表示する')
+			.setDesc('天赦日・一粒万倍日・不成就日をカレンダーに表示します')
+			.addToggle(t => t
+				.setValue(this.plugin.settings.showKichijitsu)
+				.onChange(async v => {
+					this.plugin.settings.showKichijitsu = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('　天赦日')
+			.addToggle(t => t
+				.setValue(this.plugin.settings.showTenshanichi)
+				.onChange(async v => {
+					this.plugin.settings.showTenshanichi = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('　一粒万倍日')
+			.addToggle(t => t
+				.setValue(this.plugin.settings.showIchiryuManbai)
+				.onChange(async v => {
+					this.plugin.settings.showIchiryuManbai = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('　不成就日')
+			.addToggle(t => t
+				.setValue(this.plugin.settings.showFujoju)
+				.onChange(async v => {
+					this.plugin.settings.showFujoju = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('ホバーで詳細を表示する')
+			.setDesc('日付にマウスを乗せると祝日・六曜・吉凶日をポップアップ表示します')
+			.addToggle(t => t
+				.setValue(this.plugin.settings.showTooltip)
+				.onChange(async v => {
+					this.plugin.settings.showTooltip = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('週の開始曜日')
 			.addDropdown(d => d
 				.addOption('0', '日曜日')
