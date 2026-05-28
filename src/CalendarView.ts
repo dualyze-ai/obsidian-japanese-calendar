@@ -37,7 +37,9 @@ export class CalendarView extends ItemView {
 
 		this.renderHeader(root);
 		this.renderDowRow(root);
-		this.renderDays(root);
+
+		const tooltip = root.createDiv({ cls: 'jhc-tooltip' });
+		this.renderDays(root, tooltip);
 		this.renderLegend(root);
 	}
 
@@ -79,7 +81,7 @@ export class CalendarView extends ItemView {
 		}
 	}
 
-	private renderDays(root: HTMLElement) {
+	private renderDays(root: HTMLElement, tooltip: HTMLElement) {
 		const grid = root.createDiv({ cls: 'jhc-days-grid' });
 		const today = moment();
 		const start = this.plugin.settings.weekStart;
@@ -87,26 +89,26 @@ export class CalendarView extends ItemView {
 		const firstDay = this.current.clone().startOf('month');
 		const lastDay = this.current.clone().endOf('month');
 
-		let offset = (firstDay.day() - start + 7) % 7;
+		const offset = (firstDay.day() - start + 7) % 7;
 
 		for (let i = offset - 1; i >= 0; i--) {
 			const d = firstDay.clone().subtract(i + 1, 'day');
-			this.renderCell(grid, d.toDate(), true, today);
+			this.renderCell(grid, d.toDate(), true, today, tooltip);
 		}
 
 		for (const d = firstDay.clone(); d.isSameOrBefore(lastDay); d.add(1, 'day')) {
-			this.renderCell(grid, d.toDate(), false, today);
+			this.renderCell(grid, d.toDate(), false, today, tooltip);
 		}
 
 		const totalCells = offset + lastDay.date();
 		const remaining = (7 - (totalCells % 7)) % 7;
 		for (let i = 1; i <= remaining; i++) {
 			const d = lastDay.clone().add(i, 'day');
-			this.renderCell(grid, d.toDate(), true, today);
+			this.renderCell(grid, d.toDate(), true, today, tooltip);
 		}
 	}
 
-	private renderCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Moment) {
+	private renderCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Moment, tooltip: HTMLElement) {
 		const m = moment(date);
 		const dow = date.getDay();
 		const holidayName = this.holidays.getHolidayName(date);
@@ -120,7 +122,6 @@ export class CalendarView extends ItemView {
 		if (holidayName && !otherMonth) classes.push('holiday');
 
 		const cell = grid.createDiv({ cls: classes.join(' ') });
-
 		cell.createDiv({ cls: 'jhc-day-num', text: String(date.getDate()) });
 
 		if (!otherMonth) {
@@ -133,6 +134,18 @@ export class CalendarView extends ItemView {
 				cell.createDiv({ cls: `jhc-rokuyo jhc-rokuyo-${rokuyo}`, text: rokuyo });
 			}
 
+			if (this.plugin.settings.showKichijitsu) {
+				const kichi = this.holidays.getKichijitsu(date, {
+					tenshanichi: this.plugin.settings.showTenshanichi,
+					ichiryuManbai: this.plugin.settings.showIchiryuManbai,
+					fujoju: this.plugin.settings.showFujoju,
+				});
+				for (const label of kichi) {
+					const cls = label === '不成就' ? 'jhc-kichi kyo' : 'jhc-kichi kichi';
+					cell.createDiv({ cls, text: label });
+				}
+			}
+
 			if (this.notes.noteExists(date)) {
 				cell.createDiv({ cls: 'jhc-dot' });
 			}
@@ -141,6 +154,41 @@ export class CalendarView extends ItemView {
 				await this.notes.openOrCreate(date);
 				this.render();
 			};
+		}
+
+		if (this.plugin.settings.showTooltip) {
+			cell.addEventListener('mouseenter', () => {
+				const lines: string[] = [];
+				if (holidayName) lines.push(`🎌 ${holidayName}`);
+				lines.push(this.holidays.getRokuyo(date));
+				const kichi = this.holidays.getKichijitsu(date, { tenshanichi: true, ichiryuManbai: true, fujoju: true });
+				for (const k of kichi) {
+					lines.push(k === '不成就' ? `✗ ${k}` : `◎ ${k}`);
+				}
+
+				tooltip.empty();
+				for (const line of lines) {
+					tooltip.createDiv({ text: line });
+				}
+				tooltip.style.display = 'block';
+
+				const cellRect = cell.getBoundingClientRect();
+				const containerRect = (tooltip.parentElement as HTMLElement).getBoundingClientRect();
+				let left = cellRect.left - containerRect.left;
+				const top = cellRect.bottom - containerRect.top + 4;
+
+				// 右端からはみ出さないよう調整
+				const estimatedWidth = 120;
+				if (left + estimatedWidth > containerRect.width) {
+					left = containerRect.width - estimatedWidth - 4;
+				}
+
+				tooltip.style.left = `${left}px`;
+				tooltip.style.top = `${top}px`;
+			});
+			cell.addEventListener('mouseleave', () => {
+				tooltip.style.display = 'none';
+			});
 		}
 	}
 
