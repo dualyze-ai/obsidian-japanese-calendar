@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - run: npm ci
 
@@ -36,7 +36,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${GITHUB_REF#refs/tags/}"
-          gh release create "$tag" \
-            --title "$tag" \
-            --notes "Japanese holiday calendar with wareki (Japanese era), rokuyo, and daily note integration for Obsidian." \
-            main.js manifest.json styles.css
+          if gh release view "$tag" &>/dev/null 2>&1; then
+            gh release upload "$tag" main.js manifest.json styles.css --clobber
+          else
+            gh release create "$tag" \
+              --title "$tag" \
+              --notes "Japanese holiday calendar with wareki (Japanese era), rokuyo, and daily note integration for Obsidian." \
+              main.js manifest.json styles.css
+          fi
