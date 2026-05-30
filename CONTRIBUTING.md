@@ -4,7 +4,7 @@ Thank you for your interest in contributing!
 
 ## Reporting Issues
 
-Please use [GitHub Issues](https://github.com/kojiman55/obsidian-japanese-calendar/issues) to report bugs or request features.
+Please use [GitHub Issues](https://github.com/dualyze-ai/obsidian-japanese-calendar/issues) to report bugs or request features.
 
 Include the following when reporting a bug:
 - Obsidian version
@@ -14,7 +14,7 @@ Include the following when reporting a bug:
 ## Development Setup
 
 ```bash
-git clone https://github.com/kojiman55/obsidian-japanese-calendar.git
+git clone https://github.com/dualyze-ai/obsidian-japanese-calendar.git
 cd obsidian-japanese-calendar
 npm install
 npm run build

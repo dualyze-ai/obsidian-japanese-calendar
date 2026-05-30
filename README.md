@@ -44,7 +44,7 @@ A calendar plugin for Obsidian with full support for Japanese public holidays, w
 
 ### Manual installation
 
-Download `main.js`, `manifest.json`, and `styles.css` from the latest [Release](https://github.com/kojiman55/obsidian-japanese-calendar/releases), then place them in your vault under `.obsidian/plugins/japanese-calendar/`.
+Download `main.js`, `manifest.json`, and `styles.css` from the latest [Release](https://github.com/dualyze-ai/obsidian-japanese-calendar/releases), then place them in your vault under `.obsidian/plugins/japanese-calendar/`.
 
 ---
 
@@ -58,7 +58,7 @@ Download `main.js`, `manifest.json`, and `styles.css` from the latest [Release](
 
 ### 手動インストール
 
-最新の [Release](https://github.com/kojiman55/obsidian-japanese-calendar/releases) から
+最新の [Release](https://github.com/dualyze-ai/obsidian-japanese-calendar/releases) から
 `main.js` / `manifest.json` / `styles.css` をダウンロードし、
 Vault 内の `.obsidian/plugins/japanese-calendar/` に配置してください。
 
