@@ -28,9 +28,9 @@ export class DailyNoteManager {
 			return;
 		}
 
-		const folder = this.settings.dailyNoteFolder;
-		if (folder && !this.app.vault.getAbstractFileByPath(folder)) {
-			await this.app.vault.createFolder(folder);
+		const dir = path.substring(0, path.lastIndexOf('/'));
+		if (dir && !this.app.vault.getAbstractFileByPath(dir)) {
+			await this.app.vault.createFolder(dir);
 		}
 
 		const content = await this.buildContent(date);
