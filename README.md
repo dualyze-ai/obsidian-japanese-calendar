@@ -2,6 +2,10 @@
 
 A calendar plugin for Obsidian with full support for Japanese public holidays, wareki (Japanese era), rokuyo, and kichijitsu (auspicious/inauspicious days). Click any date to create or open a daily note automatically.
 
+| Light mode | Dark mode |
+|---|---|
+| ![Light mode](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/main/assets/light-mode.png) | ![Dark mode](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/main/assets/dark-mode.png) |
+
 ## Features
 
 - Japanese public holidays highlighted in red (official Cabinet Office data)
