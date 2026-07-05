@@ -120,6 +120,10 @@ Placeholders available in custom templates:
 
 ## Changelog
 
+### v1.1.2
+- Added light/dark mode screenshots to the README
+- Added English sections for Settings, Kichijitsu, Template Variables, Tech Stack, and Changelog
+
 ### v1.1.1
 - Replaced the internal date library `moment` with `dayjs` (same format tokens, no impact on your settings)
 - Tooltip show/hide and positioning now use `setCssStyles`
@@ -193,6 +197,10 @@ Placeholders available in custom templates:
 - [@holiday-jp/holiday_jp](https://github.com/holiday-jp/holiday_jp-js) — 日本の祝日データ（内閣府公式）
 
 ## Changelog
+
+### v1.1.2
+- READMEにライト/ダークモードのスクリーンショットを追加
+- README: Settings/Kichijitsu/Template Variables/Tech Stack/Changelogの英語版セクションを追加
 
 ### v1.1.1
 - 内部の日付処理ライブラリを `moment` から `dayjs` に置き換え（フォーマットトークンは同一のため設定への影響なし）
