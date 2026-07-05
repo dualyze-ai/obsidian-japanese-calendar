@@ -62,6 +62,82 @@ Download `main.js`, `manifest.json`, and `styles.css` from the latest [Release](
 `main.js` / `manifest.json` / `styles.css` をダウンロードし、
 Vault 内の `.obsidian/plugins/japanese-calendar/` に配置してください。
 
+---
+
+## Settings
+
+| Setting | Default | Description |
+|---|---|---|
+| Daily note folder | Daily Notes | Folder where daily notes are saved |
+| Filename format | YYYY-MM-DD | Date format (same tokens as Moment.js) |
+| Template file path | (empty) | Path to a custom template |
+| Show wareki | ON | Show the Japanese era (Reiwa, etc.) in the header |
+| Show holiday name | ON | Show holiday names inside cells |
+| Show rokuyo | OFF | Show Taian, Butsumetsu, etc. |
+| Show kichijitsu | ON | Show Tenshanichi, Ichiryū Manbai-nichi, Fujōju-nichi |
+| &nbsp;&nbsp;Tenshanichi | ON | Show Tenshanichi (auspicious day) |
+| &nbsp;&nbsp;Ichiryū Manbai-nichi | ON | Show Ichiryū Manbai-nichi (auspicious day) |
+| &nbsp;&nbsp;Fujōju-nichi | ON | Show Fujōju-nichi (inauspicious day) |
+| Show tooltip on hover | ON | Show holiday, rokuyo, and kichijitsu on hover |
+| Week start | Sunday | Sunday or Monday |
+| Auto-insert holiday callout | ON | Insert a callout into the holiday's daily note |
+| Show holiday count in status bar | ON | Show this month's holiday count |
+
+> **Tips**
+> - **Filename format**: the extension (`.md`) is appended automatically — do not include it in the format.
+
+## About Kichijitsu
+
+| Type | Description | Cycle |
+|---|---|---|
+| Tenshanichi | 5–6 times a year. The most auspicious day, on which all sins are said to be forgiven | Sexagenary (60-day) cycle × season |
+| Ichiryū Manbai-nichi | A few times a month. An auspicious day said to make small things grow into great ones | Lunar month × day's earthly branch |
+| Fujōju-nichi | A few times a month. An inauspicious day on which nothing is said to succeed | Lunar month × day's earthly branch |
+
+## Template Variables
+
+Placeholders available in custom templates:
+
+| Variable | Description |
+|---|---|
+| `{{date}}` | Date (in the configured format) |
+| `{{date:YYYY}}` | Year |
+| `{{date:MM}}` | Month |
+| `{{date:DD}}` | Day |
+| `{{holiday}}` | Holiday name (empty if not a holiday) |
+| `{{rokuyo}}` | Rokuyo |
+| `{{wareki}}` | Japanese era (e.g. Reiwa 8) |
+
+## Tech Stack
+
+- TypeScript
+- Obsidian Plugin API
+- [@holiday-jp/holiday_jp](https://github.com/holiday-jp/holiday_jp-js) — Japanese holiday data (official Cabinet Office data)
+
+## Changelog
+
+### v1.1.1
+- Replaced the internal date library `moment` with `dayjs` (same format tokens, no impact on your settings)
+- Tooltip show/hide and positioning now use `setCssStyles`
+
+### v1.1.0
+- **Light/dark mode toggle** — switch the calendar's appearance with the sun/moon icon, independent of Obsidian's own theme
+- Fixed daily note creation failing when the filename format includes date-based subfolders (e.g. `YYYY/MM/YYYY-MM-DD`)
+- README: added a tip about the filename format's extension
+
+### v1.0.12
+- **Kichijitsu display** — show Tenshanichi, Ichiryū Manbai-nichi, and Fujōju-nichi on the calendar (toggle each independently)
+- **Hover tooltip** — hover over a date to see holiday, rokuyo, and kichijitsu at a glance
+- Changed author to DualyzeAI, authorUrl to dualyzeai.com
+
+### v1.0.9
+- Fixed calendar cell height shifting when a holiday name wraps to a second line
+
+### v1.0.8
+- Initial community plugin release
+
+---
+
 ## 設定
 
 | 設定名 | デフォルト | 説明 |
