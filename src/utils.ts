@@ -1,3 +1,5 @@
+import { getLanguage } from 'obsidian';
+
 export function toWareki(year: number): string {
 	if (year >= 2019) return `令和${year - 2018}年`;
 	if (year >= 1989) return `平成${year - 1988}年`;
@@ -11,6 +13,5 @@ export function getDayLabel(index: number): string {
 }
 
 export function detectLocale(): 'ja' | 'en' {
-	const lang = window.localStorage.getItem('language') || navigator.language || '';
-	return lang.toLowerCase().startsWith('ja') ? 'ja' : 'en';
+	return getLanguage().toLowerCase().startsWith('ja') ? 'ja' : 'en';
 }

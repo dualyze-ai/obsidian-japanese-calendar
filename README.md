@@ -125,6 +125,9 @@ Placeholders available in custom templates:
 
 ## Changelog
 
+### v1.1.4
+- Switched language detection to Obsidian's official `getLanguage()` API instead of reading `localStorage` directly (requires Obsidian 1.8.7+)
+
 ### v1.1.3
 - Fixed day-of-week tokens (`ddd`/`dddd`) in the daily note filename format always rendering in English, even when Obsidian's language was set to Japanese, which caused existing Japanese-named daily notes to go unrecognized and be re-created (#4)
 - Fixed an empty filename format silently failing to create the note (it now falls back to `YYYY-MM-DD`), and failures are now reported with a notice instead of being swallowed
@@ -206,6 +209,9 @@ Placeholders available in custom templates:
 - [@holiday-jp/holiday_jp](https://github.com/holiday-jp/holiday_jp-js) — 日本の祝日データ（内閣府公式）
 
 ## Changelog
+
+### v1.1.4
+- 言語検出を`localStorage`直接参照からObsidian公式API `getLanguage()` に変更（Obsidian 1.8.7以降が必要）
 
 ### v1.1.3
 - デイリーノートのファイル名フォーマットの曜日トークン（`ddd`/`dddd`）が、Obsidianの言語設定を日本語にしていても常に英語表記になり、過去に日本語表記で作成済みのデイリーノートを認識できず重複作成してしまう不具合を修正（#4）
