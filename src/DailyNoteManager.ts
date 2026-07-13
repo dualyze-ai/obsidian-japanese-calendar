@@ -52,9 +52,13 @@ export class DailyNoteManager {
 	}
 
 	filePath(date: Date): string {
-		const fileName = dayjs(date).format(this.settings.dailyNoteFormat);
+		const fileName = dayjs(date).format(this.noteFormat());
 		const folder = this.settings.dailyNoteFolder;
 		return folder ? `${folder}/${fileName}.md` : `${fileName}.md`;
+	}
+
+	private noteFormat(): string {
+		return this.settings.dailyNoteFormat || 'YYYY-MM-DD';
 	}
 
 	private async buildContent(date: Date): Promise<string> {
@@ -85,7 +89,7 @@ export class DailyNoteManager {
 	): string {
 		const m = dayjs(date);
 		return tmpl
-			.replace(/{{date}}/g, m.format(this.settings.dailyNoteFormat))
+			.replace(/{{date}}/g, m.format(this.noteFormat()))
 			.replace(/{{date:YYYY}}/g, m.format('YYYY'))
 			.replace(/{{date:MM}}/g, m.format('MM'))
 			.replace(/{{date:DD}}/g, m.format('DD'))

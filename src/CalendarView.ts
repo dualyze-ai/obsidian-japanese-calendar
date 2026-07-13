@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, setIcon } from 'obsidian';
+import { ItemView, WorkspaceLeaf, Notice, setIcon } from 'obsidian';
 import dayjs, { Dayjs } from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { HolidayManager } from './HolidayManager';
@@ -169,8 +169,13 @@ export class CalendarView extends ItemView {
 			}
 
 			cell.onclick = async () => {
-				await this.notes.openOrCreate(date);
-				this.render();
+				try {
+					await this.notes.openOrCreate(date);
+					this.render();
+				} catch (e) {
+					new Notice('デイリーノートの作成に失敗しました');
+					console.error(e);
+				}
 			};
 		}
 

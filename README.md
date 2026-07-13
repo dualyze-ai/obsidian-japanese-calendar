@@ -125,6 +125,10 @@ Placeholders available in custom templates:
 
 ## Changelog
 
+### v1.1.3
+- Fixed day-of-week tokens (`ddd`/`dddd`) in the daily note filename format always rendering in English, even when Obsidian's language was set to Japanese, which caused existing Japanese-named daily notes to go unrecognized and be re-created (#4)
+- Fixed an empty filename format silently failing to create the note (it now falls back to `YYYY-MM-DD`), and failures are now reported with a notice instead of being swallowed
+
 ### v1.1.2
 - Added light/dark mode screenshots to the README
 - Added English sections for Settings, Kichijitsu, Template Variables, Tech Stack, and Changelog
@@ -202,6 +206,10 @@ Placeholders available in custom templates:
 - [@holiday-jp/holiday_jp](https://github.com/holiday-jp/holiday_jp-js) — 日本の祝日データ（内閣府公式）
 
 ## Changelog
+
+### v1.1.3
+- デイリーノートのファイル名フォーマットの曜日トークン（`ddd`/`dddd`）が、Obsidianの言語設定を日本語にしていても常に英語表記になり、過去に日本語表記で作成済みのデイリーノートを認識できず重複作成してしまう不具合を修正（#4）
+- ファイル名フォーマットが空の場合にノート作成が静かに失敗する不具合を修正（`YYYY-MM-DD`にフォールバックし、失敗時は通知を表示するように変更）
 
 ### v1.1.2
 - READMEにライト/ダークモードのスクリーンショットを追加

@@ -9,3 +9,8 @@ export function getDayLabel(index: number): string {
 	const labels = ['日', '月', '火', '水', '木', '金', '土'];
 	return labels[index] ?? '日';
 }
+
+export function detectLocale(): 'ja' | 'en' {
+	const lang = window.localStorage.getItem('language') || navigator.language || '';
+	return lang.toLowerCase().startsWith('ja') ? 'ja' : 'en';
+}

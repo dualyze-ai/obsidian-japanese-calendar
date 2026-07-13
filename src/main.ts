@@ -1,10 +1,12 @@
 import { Plugin, TFile } from 'obsidian';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import 'dayjs/locale/ja';
 import { CalendarView, VIEW_TYPE } from './CalendarView';
 import { DailyNoteManager } from './DailyNoteManager';
 import { HolidayManager } from './HolidayManager';
 import { JapaneseCalendarSettingTab } from './SettingTab';
+import { detectLocale } from './utils';
 
 dayjs.extend(customParseFormat);
 
@@ -51,6 +53,8 @@ export default class JapaneseCalendarPlugin extends Plugin {
 	private statusBarItem: HTMLElement | null = null;
 
 	async onload() {
+		dayjs.locale(detectLocale());
+
 		await this.loadSettings();
 
 		this.registerView(VIEW_TYPE, leaf => new CalendarView(leaf, this));
