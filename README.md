@@ -124,13 +124,6 @@ Designed for Obsidian's sidebar from the ground up. Every display mode maximizes
 2. Search for "Japanese Calendar"
 3. Click **Install**, then **Enable**
 
-### BRAT
-
-If you want to preview features before the official release:
-
-1. Install the [BRAT](https://obsidian.md/plugins?id=obsidian42-brat) plugin
-2. Add `dualyze-ai/obsidian-japanese-calendar` to your BRAT plugin list
-
 ### Manual installation
 
 Download `main.js`, `manifest.json`, and `styles.css` from the latest [Release](https://github.com/dualyze-ai/obsidian-japanese-calendar/releases), then place them in your vault under `.obsidian/plugins/japanese-calendar/`.
