@@ -38,7 +38,7 @@ A beautifully crafted calendar for Obsidian with full Japanese holiday support, 
 ## Features
 
 - **Month View** — the familiar monthly calendar with holidays, rokuyo, and kichijitsu
-- **2-Month View** — a vertically stacked two-month view for short-term planning
+- **2-Month View** — a two-month view arranged vertically or horizontally for short-term planning
 - **6-Month View** — compact six-month layout ideal for mid-term project tracking
 - **Year View** — a responsive 12-month grid inspired by macOS Calendar
 - **Japanese public holidays** — official Cabinet Office data, highlighted in red
@@ -68,7 +68,7 @@ The default view. A traditional single-month calendar showing holidays, holiday 
 
 ### 2-Month View
 
-See the current month plus the next two months stacked vertically. Navigation moves one month at a time — perfect for keeping track of upcoming events and deadlines without losing context.
+See the current month plus the next month. The responsive grid adapts to your sidebar width — two columns when wide, one column when narrow. Navigation moves one month at a time — perfect for keeping track of upcoming events and deadlines without losing context.
 
 | ![2-Month View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/two-month-view.png) |
 |---|
@@ -237,7 +237,7 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 ### v1.2.0
 - Added Month, 2-Month, 6-Month, and Year display modes
 - Added responsive year view with auto-grid columns
-- Added vertically stacked multi-month views optimized for the sidebar
+- Added multi-month views optimized for the sidebar
 - Added date-to-note links for existing Markdown notes
 - Added note-link markers and link management UI
 - Added display-mode persistence across restarts
@@ -293,7 +293,7 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 ### 表示モード
 
 - **1ヶ月表示** — 従来の月間カレンダー。祝日・六曜・吉凶日を表示
-- **2ヶ月表示** — 縦に2ヶ月を重ねた表示。前後の予定確認に最適
+- **2ヶ月表示** — 縦か横に2ヶ月を重ねたレスポンシブ表示。前後の予定確認に最適
 - **6ヶ月表示** — 中期的な計画向けのコンパクトな6ヶ月表示
 - **年表示** — 12ヶ月を一覧できるレスポンシブグリッド
 
