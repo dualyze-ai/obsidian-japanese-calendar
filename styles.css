@@ -702,7 +702,6 @@
 .jhc-mini-day.has-daily-note .jhc-mini-day-num {
 	text-decoration: underline;
 	text-underline-offset: 1px;
-	text-decoration-thickness: 1px;
 }
 
 /* ─── Link Manager Modal ───────────────────────────────── */

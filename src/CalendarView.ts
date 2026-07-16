@@ -12,11 +12,22 @@ export const VIEW_TYPE = 'japanese-calendar';
 
 export type CalendarDisplayMode = 'month' | 'two-month' | 'six-month' | 'year';
 
+const SVG_ICON_BASE_ATTR = {
+	width: '16',
+	height: '16',
+	viewBox: '0 0 24 24',
+	fill: 'none',
+	stroke: 'currentColor',
+	'stroke-width': '2',
+	'stroke-linecap': 'round',
+	'stroke-linejoin': 'round',
+};
+
 export class CalendarView extends ItemView {
 	private current: Dayjs;
 	private holidays: HolidayManager;
 	private notes: DailyNoteManager;
-	private noteLinkManager = this.plugin.noteLinkManager;
+	noteLinkManager = this.plugin.noteLinkManager;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: JapaneseCalendarPlugin) {
 		super(leaf);
@@ -62,11 +73,12 @@ export class CalendarView extends ItemView {
 				this.renderYearView(root);
 				break;
 			case 'month':
-			default:
+			default: {
 				const tooltip = root.createDiv({ cls: 'jhc-tooltip' });
 				this.renderMonthView(root, this.current, { tooltip, isPrimary: true });
 				this.renderLegend(root);
 				break;
+			}
 		}
 	}
 
@@ -197,7 +209,7 @@ export class CalendarView extends ItemView {
 						document.removeEventListener('click', closeHandler);
 					}
 				};
-				setTimeout(() => document.addEventListener('click', closeHandler), 0);
+				window.setTimeout(() => document.addEventListener('click', closeHandler), 0);
 			}
 		};
 	}
@@ -205,75 +217,28 @@ export class CalendarView extends ItemView {
 	private renderModeIcon(container: HTMLElement, mode: CalendarDisplayMode) {
 		if (mode === 'six-month') {
 			// Inline SVG: small 2x2 grid icon
-			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-			svg.setAttribute('width', '16');
-			svg.setAttribute('height', '16');
-			svg.setAttribute('viewBox', '0 0 24 24');
-			svg.setAttribute('fill', 'none');
-			svg.setAttribute('stroke', 'currentColor');
-			svg.setAttribute('stroke-width', '2');
-			svg.setAttribute('stroke-linecap', 'round');
-			svg.setAttribute('stroke-linejoin', 'round');
-			const r1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-			r1.setAttribute('x', '3'); r1.setAttribute('y', '3');
-			r1.setAttribute('width', '7'); r1.setAttribute('height', '7');
-			r1.setAttribute('rx', '1');
-			svg.appendChild(r1);
-			const r2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-			r2.setAttribute('x', '14'); r2.setAttribute('y', '3');
-			r2.setAttribute('width', '7'); r2.setAttribute('height', '7');
-			r2.setAttribute('rx', '1');
-			svg.appendChild(r2);
-			const r3 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-			r3.setAttribute('x', '3'); r3.setAttribute('y', '14');
-			r3.setAttribute('width', '7'); r3.setAttribute('height', '7');
-			r3.setAttribute('rx', '1');
-			svg.appendChild(r3);
-			const r4 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-			r4.setAttribute('x', '14'); r4.setAttribute('y', '14');
-			r4.setAttribute('width', '7'); r4.setAttribute('height', '7');
-			r4.setAttribute('rx', '1');
-			svg.appendChild(r4);
-			container.appendChild(svg);
+			const svg = container.createSvg('svg', { attr: SVG_ICON_BASE_ATTR });
+			const positions = [
+				{ x: '3', y: '3' },
+				{ x: '14', y: '3' },
+				{ x: '3', y: '14' },
+				{ x: '14', y: '14' },
+			];
+			for (const { x, y } of positions) {
+				svg.createSvg('rect', { attr: { x, y, width: '7', height: '7', rx: '1' } });
+			}
 		} else if (mode === 'two-month') {
 			// Inline SVG: two overlapping calendars
-			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-			svg.setAttribute('width', '16');
-			svg.setAttribute('height', '16');
-			svg.setAttribute('viewBox', '0 0 24 24');
-			svg.setAttribute('fill', 'none');
-			svg.setAttribute('stroke', 'currentColor');
-			svg.setAttribute('stroke-width', '2');
-			svg.setAttribute('stroke-linecap', 'round');
-			svg.setAttribute('stroke-linejoin', 'round');
-			const cal1 = [
-				['rect', { x: '3', y: '4', width: '18', height: '18', rx: '2', ry: '2' }],
-				['line', { x1: '16', y1: '2', x2: '16', y2: '6' }],
-				['line', { x1: '8', y1: '2', x2: '8', y2: '6' }],
-				['line', { x1: '3', y1: '10', x2: '21', y2: '10' }],
-			] as const;
-			for (const [tag, attrs] of cal1) {
-				const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-				for (const [k, v] of Object.entries(attrs)) {
-					el.setAttribute(k, v);
-				}
-				svg.appendChild(el);
-			}
+			const svg = container.createSvg('svg', { attr: SVG_ICON_BASE_ATTR });
+			svg.createSvg('rect', { attr: { x: '3', y: '4', width: '18', height: '18', rx: '2', ry: '2' } });
+			svg.createSvg('line', { attr: { x1: '16', y1: '2', x2: '16', y2: '6' } });
+			svg.createSvg('line', { attr: { x1: '8', y1: '2', x2: '8', y2: '6' } });
+			svg.createSvg('line', { attr: { x1: '3', y1: '10', x2: '21', y2: '10' } });
 			// Second calendar (offset, semi-transparent)
-			const cal2 = [
-				['rect', { x: '6', y: '7', width: '18', height: '18', rx: '2', ry: '2', opacity: '0.4' }],
-				['line', { x1: '19', y1: '5', x2: '19', y2: '9', opacity: '0.4' }],
-				['line', { x1: '11', y1: '5', x2: '11', y2: '9', opacity: '0.4' }],
-				['line', { x1: '6', y1: '13', x2: '24', y2: '13', opacity: '0.4' }],
-			] as const;
-			for (const [tag, attrs] of cal2) {
-				const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-				for (const [k, v] of Object.entries(attrs)) {
-					el.setAttribute(k, v);
-				}
-				svg.appendChild(el);
-			}
-			container.appendChild(svg);
+			svg.createSvg('rect', { attr: { x: '6', y: '7', width: '18', height: '18', rx: '2', ry: '2', opacity: '0.4' } });
+			svg.createSvg('line', { attr: { x1: '19', y1: '5', x2: '19', y2: '9', opacity: '0.4' } });
+			svg.createSvg('line', { attr: { x1: '11', y1: '5', x2: '11', y2: '9', opacity: '0.4' } });
+			svg.createSvg('line', { attr: { x1: '6', y1: '13', x2: '24', y2: '13', opacity: '0.4' } });
 		} else {
 			const iconName = mode === 'month' ? 'calendar' : 'calendar-days';
 			setIcon(container, iconName);
@@ -513,10 +478,10 @@ export class CalendarView extends ItemView {
 		};
 		header.setAttr('tabindex', '0');
 		header.setAttr('role', 'button');
-		header.addEventListener('keydown', async (e) => {
+		header.addEventListener('keydown', (e) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
-				header.onclick?.(new MouseEvent('click'));
+				void header.onclick?.(new MouseEvent('click'));
 			}
 		});
 
@@ -656,7 +621,7 @@ export class CalendarView extends ItemView {
 				item.onClick(async () => {
 					try {
 						await this.notes.openOrCreate(date);
-					} catch (err) {
+					} catch {
 						new Notice('デイリーノートの作成に失敗しました');
 					}
 				});
@@ -714,7 +679,7 @@ export class CalendarView extends ItemView {
 
 	// ─── Note Selector ─────────────────────────────────────────
 
-	private showNoteSelector(dateKey: string) {
+	showNoteSelector(dateKey: string) {
 		const allFiles = this.noteLinkManager.getAllMarkdownFiles();
 		const existing = this.noteLinkManager.getLinks(dateKey);
 
@@ -725,91 +690,14 @@ export class CalendarView extends ItemView {
 			return;
 		}
 
-		const view = this;
-
-		const modal = new (class extends FuzzySuggestModal<TFile> {
-			constructor() {
-				super(view.app);
-				this.setPlaceholder(getStr('selectNote'));
-			}
-			getItems(): TFile[] {
-				return available;
-			}
-			getItemText(file: TFile): string {
-				return file.path;
-			}
-			async onChooseItem(file: TFile): Promise<void> {
-				await view.noteLinkManager.addLink(dateKey, file.path);
-				new Notice(getStr('linkAdded'));
-				view.render();
-			}
-		})();
-		modal.open();
+		new NoteSelectorModal(this, available, dateKey).open();
 	}
 
 	// ─── Link Manager ──────────────────────────────────────────
 
 	private showLinkManager(dateKey: string, date: Date) {
 		const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
-		const view = this;
-
-		const modal = new (class extends Modal {
-			constructor() {
-				super(view.app);
-				this.titleEl.setText(`${getStr('manageLinks')} - ${dateStr}`);
-			}
-			onOpen() {
-				const { contentEl } = this;
-				contentEl.empty();
-				const links = view.noteLinkManager.getLinks(dateKey);
-
-				if (links.length === 0) {
-					contentEl.createDiv({ text: getStr('noLinkedNotes'), cls: 'jhc-link-manager-empty' });
-				} else {
-					const list = contentEl.createDiv({ cls: 'jhc-link-manager-list' });
-					for (const link of links) {
-						const item = list.createDiv({ cls: 'jhc-link-manager-item' });
-						const file = view.noteLinkManager.resolveFile(link);
-						const label = file ? file.path : `${link} (${getStr('noteNotFound')})`;
-						const nameSpan = item.createSpan({ text: label, cls: 'jhc-link-manager-name' });
-
-						if (file) {
-							nameSpan.onclick = async () => {
-								await view.app.workspace.getLeaf(false).openFile(file);
-								this.close();
-							};
-							nameSpan.setAttr('tabindex', '0');
-							nameSpan.setAttr('role', 'button');
-						}
-
-						const unlinkBtn = item.createEl('button', {
-							text: getStr('unlink'),
-							cls: 'jhc-link-manager-unlink',
-						});
-						unlinkBtn.onclick = async () => {
-							await view.noteLinkManager.removeLink(dateKey, link);
-							new Notice(getStr('linkRemoved'));
-							this.onOpen();
-						};
-					}
-				}
-
-				const addBtn = contentEl.createEl('button', {
-					text: getStr('linkNote'),
-					cls: 'jhc-link-manager-add',
-				});
-				addBtn.onclick = () => {
-					this.close();
-					view.showNoteSelector(dateKey);
-				};
-			}
-			onClose() {
-				const { contentEl } = this;
-				contentEl.empty();
-				view.render();
-			}
-		})();
-		modal.open();
+		new LinkManagerModal(this, dateKey, dateStr).open();
 	}
 
 	// ─── Tooltip ──────────────────────────────────────────────
@@ -872,5 +760,99 @@ export class CalendarView extends ItemView {
 	refresh() {
 		this.notes = new DailyNoteManager(this.app, this.plugin.settings);
 		this.render();
+	}
+}
+
+// ─── Note Selector Modal ────────────────────────────────────
+
+class NoteSelectorModal extends FuzzySuggestModal<TFile> {
+	constructor(
+		private readonly view: CalendarView,
+		private readonly files: TFile[],
+		private readonly dateKey: string,
+	) {
+		super(view.app);
+		this.setPlaceholder(getStr('selectNote'));
+	}
+
+	getItems(): TFile[] {
+		return this.files;
+	}
+
+	getItemText(file: TFile): string {
+		return file.path;
+	}
+
+	onChooseItem(file: TFile): void {
+		void (async () => {
+			await this.view.noteLinkManager.addLink(this.dateKey, file.path);
+			new Notice(getStr('linkAdded'));
+			this.view.render();
+		})();
+	}
+}
+
+// ─── Link Manager Modal ─────────────────────────────────────
+
+class LinkManagerModal extends Modal {
+	constructor(
+		private readonly view: CalendarView,
+		private readonly dateKey: string,
+		dateStr: string,
+	) {
+		super(view.app);
+		this.titleEl.setText(`${getStr('manageLinks')} - ${dateStr}`);
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+		const links = this.view.noteLinkManager.getLinks(this.dateKey);
+
+		if (links.length === 0) {
+			contentEl.createDiv({ text: getStr('noLinkedNotes'), cls: 'jhc-link-manager-empty' });
+		} else {
+			const list = contentEl.createDiv({ cls: 'jhc-link-manager-list' });
+			for (const link of links) {
+				const item = list.createDiv({ cls: 'jhc-link-manager-item' });
+				const file = this.view.noteLinkManager.resolveFile(link);
+				const label = file ? file.path : `${link} (${getStr('noteNotFound')})`;
+				const nameSpan = item.createSpan({ text: label, cls: 'jhc-link-manager-name' });
+
+				if (file) {
+					nameSpan.onclick = async () => {
+						await this.view.app.workspace.getLeaf(false).openFile(file);
+						this.close();
+					};
+					nameSpan.setAttr('tabindex', '0');
+					nameSpan.setAttr('role', 'button');
+				}
+
+				const unlinkBtn = item.createEl('button', {
+					text: getStr('unlink'),
+					cls: 'jhc-link-manager-unlink',
+				});
+				unlinkBtn.onclick = async () => {
+					await this.view.noteLinkManager.removeLink(this.dateKey, link);
+					new Notice(getStr('linkRemoved'));
+					this.onOpen();
+				};
+			}
+		}
+
+		const addBtn = contentEl.createEl('button', {
+			text: getStr('linkNote'),
+			cls: 'jhc-link-manager-add',
+		});
+		addBtn.onclick = () => {
+			this.close();
+			this.view.showNoteSelector(this.dateKey);
+		};
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+		this.view.render();
 	}
 }
