@@ -1,7 +1,7 @@
 {
 	"id": "japanese-calendar",
 	"name": "Japanese Calendar",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"minAppVersion": "1.8.7",
 	"description": "Japanese holiday calendar with wareki, rokuyo, kichijitsu (auspicious days), hover tooltips, and daily note integration.",
 	"author": "DualyzeAI",
