@@ -2,7 +2,7 @@ import { getLanguage } from 'obsidian';
 
 const ja: Record<string, string> = {
 	modeMonth: '1ヶ月',
-	modeTwoMonth: '3ヶ月',
+	modeTwoMonth: '2ヶ月',
 	modeSixMonth: '6ヶ月',
 	modeYear: '1年',
 	today: '今日',
@@ -21,14 +21,14 @@ const ja: Record<string, string> = {
 	goToPrevious: '前に戻る',
 	goToNext: '次へ進む',
 	commandShowMonth: '月表示を開く',
-	commandShowTwoMonth: '3か月表示を開く',
+	commandShowTwoMonth: '2か月表示を開く',
 	commandShowSixMonth: '6か月表示を開く',
 	commandShowYear: '年表示を開く',
 };
 
 const en: Record<string, string> = {
 	modeMonth: '1 Month',
-	modeTwoMonth: '3 Months',
+	modeTwoMonth: '2 Months',
 	modeSixMonth: '6 Months',
 	modeYear: '1 Year',
 	today: 'Today',
@@ -47,7 +47,7 @@ const en: Record<string, string> = {
 	goToPrevious: 'Go to previous',
 	goToNext: 'Go to next',
 	commandShowMonth: 'Show month view',
-	commandShowTwoMonth: 'Show 3-month view',
+	commandShowTwoMonth: 'Show 2-month view',
 	commandShowSixMonth: 'Show 6-month view',
 	commandShowYear: 'Show year view',
 };

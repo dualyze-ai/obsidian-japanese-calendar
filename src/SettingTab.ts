@@ -42,7 +42,7 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 					{ name: 'ホバーで詳細を表示する', desc: '日付にマウスを乗せると祝日・六曜・吉凶日をポップアップ表示します', control: { type: 'toggle', key: 'showTooltip' } },
 					{
 						name: '表示モード',
-						desc: '1ヶ月、3ヶ月、6ヶ月、1年から選択します',
+						desc: '1ヶ月、2ヶ月、6ヶ月、1年から選択します',
 						control: {
 							type: 'dropdown',
 							key: 'displayMode',
@@ -209,7 +209,7 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('表示モード')
-			.setDesc('1ヶ月、3ヶ月、6ヶ月、1年から選択します')
+			.setDesc('1ヶ月、2ヶ月、6ヶ月、1年から選択します')
 			.addDropdown(d => d
 				.addOption('month', getStr('modeMonth'))
 				.addOption('two-month', getStr('modeTwoMonth'))

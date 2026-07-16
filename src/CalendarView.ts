@@ -64,7 +64,7 @@ export class CalendarView extends ItemView {
 		const mode = this.plugin.settings.displayMode;
 		switch (mode) {
 			case 'two-month':
-				this.renderThreeMonthView(root);
+				this.renderTwoMonthView(root);
 				break;
 			case 'six-month':
 				this.renderSixMonthView(root);
@@ -419,11 +419,11 @@ export class CalendarView extends ItemView {
 		}
 	}
 
-	// ─── Three-Month View ────────────────────────────────────
+	// ─── Two-Month View ──────────────────────────────────────
 
-	private renderThreeMonthView(root: HTMLElement) {
-		const container = root.createDiv({ cls: 'jhc-three-month-grid' });
-		for (let i = 0; i < 3; i++) {
+	private renderTwoMonthView(root: HTMLElement) {
+		const container = root.createDiv({ cls: 'jhc-two-month-grid' });
+		for (let i = 0; i < 2; i++) {
 			const d = this.current.add(i, 'month');
 			this.renderMonthSection(container, d, false);
 		}

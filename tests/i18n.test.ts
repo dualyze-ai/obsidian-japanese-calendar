@@ -20,7 +20,7 @@ describe('i18n', () => {
 		(obsidian.getLanguage as ReturnType<typeof vi.fn>).mockReturnValue('ja');
 		const i18n = await import('../src/i18n');
 		expect(i18n.getStr('modeMonth')).toBe('1ヶ月');
-		expect(i18n.getStr('modeTwoMonth')).toBe('3ヶ月');
+		expect(i18n.getStr('modeTwoMonth')).toBe('2ヶ月');
 		expect(i18n.getStr('modeYear')).toBe('1年');
 		expect(i18n.getStr('today')).toBe('今日');
 		expect(i18n.getStr('openDailyNote')).toBe('デイリーノートを開く');

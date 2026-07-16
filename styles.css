@@ -503,7 +503,7 @@
 
 /* ─── Multi-Month Grid Views ──────────────────────────── */
 
-.jhc-three-month-grid {
+.jhc-two-month-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 	gap: 12px;
@@ -519,11 +519,11 @@
 	margin-bottom: 4px;
 }
 
-.jhc-three-month-grid .jhc-days-grid {
+.jhc-two-month-grid .jhc-days-grid {
 	grid-auto-rows: 40px;
 }
 
-.jhc-three-month-grid .jhc-days-grid.compact {
+.jhc-two-month-grid .jhc-days-grid.compact {
 	grid-auto-rows: 30px;
 }
 
@@ -560,7 +560,7 @@
 	height: 18px;
 }
 
-.jhc-three-month-grid .jhc-day-num {
+.jhc-two-month-grid .jhc-day-num {
 	font-size: 11px;
 	width: 20px;
 	height: 20px;
