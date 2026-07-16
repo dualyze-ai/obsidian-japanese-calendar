@@ -17,7 +17,7 @@
 		"@eslint/js": "9.30.1",
 		"@types/node": "^22.10.0",
 		"esbuild": "0.25.5",
-		"eslint-plugin-obsidianmd": "0.1.9",
+		"eslint-plugin-obsidianmd": "^0.4.1",
 		"globals": "14.0.0",
 		"jiti": "2.6.1",
 		"tslib": "2.4.0",
@@ -28,6 +28,6 @@
 	"dependencies": {
 		"@holiday-jp/holiday_jp": "^2.5.1",
 		"dayjs": "^1.11.21",
-		"obsidian": "latest"
+		"obsidian": "^1.13.1"
 	}
 }

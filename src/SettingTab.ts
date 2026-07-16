@@ -1,6 +1,7 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting, SettingDefinitionItem } from 'obsidian';
 import type JapaneseCalendarPlugin from './main';
 import type { CalendarDisplayMode } from './CalendarView';
+import type { PluginSettings } from './main';
 import { getStr } from './utils';
 
 export class JapaneseCalendarSettingTab extends PluginSettingTab {
@@ -8,6 +9,89 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 		super(app, plugin);
 	}
 
+	// Obsidian 1.13.0+: 宣言的Settings API（設定検索に対応）
+	// 1.13.0未満のフォールバックとして display() も維持する
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		return [
+			{
+				name: 'デイリーノートの保存フォルダ',
+				desc: '例：daily notes',
+				control: { type: 'text', key: 'dailyNoteFolder', placeholder: 'Daily notes' },
+			},
+			{
+				name: 'ファイル名フォーマット',
+				desc: '日付フォーマット（例: `YYYY-MM-DD`）',
+				control: { type: 'text', key: 'dailyNoteFormat' },
+			},
+			{
+				name: 'テンプレートファイルのパス',
+				desc: '空欄の場合はデフォルトテンプレートを使用',
+				control: { type: 'text', key: 'templatePath', placeholder: 'Templates/daily.md' },
+			},
+			{
+				type: 'group',
+				heading: '表示設定',
+				items: [
+					{ name: '和暦を表示する', desc: 'ヘッダーに「令和〇年」を表示します', control: { type: 'toggle', key: 'showWareki' } },
+					{ name: '祝日名を表示する', desc: '祝日のセルに祝日名を表示します', control: { type: 'toggle', key: 'showHolidayName' } },
+					{ name: '六曜を表示する', desc: '大安・仏滅などを各セルに表示します', control: { type: 'toggle', key: 'showRokuyo' } },
+					{ name: '吉凶日を表示する', desc: '天赦日・一粒万倍日・不成就日をカレンダーに表示します', control: { type: 'toggle', key: 'showKichijitsu' } },
+					{ name: '　天赦日', control: { type: 'toggle', key: 'showTenshanichi' } },
+					{ name: '　一粒万倍日', control: { type: 'toggle', key: 'showIchiryuManbai' } },
+					{ name: '　不成就日', control: { type: 'toggle', key: 'showFujoju' } },
+					{ name: 'ホバーで詳細を表示する', desc: '日付にマウスを乗せると祝日・六曜・吉凶日をポップアップ表示します', control: { type: 'toggle', key: 'showTooltip' } },
+					{
+						name: '表示モード',
+						desc: '1ヶ月、3ヶ月、6ヶ月、1年から選択します',
+						control: {
+							type: 'dropdown',
+							key: 'displayMode',
+							options: {
+								month: getStr('modeMonth'),
+								'two-month': getStr('modeTwoMonth'),
+								'six-month': getStr('modeSixMonth'),
+								year: getStr('modeYear'),
+							},
+						},
+					},
+					{
+						name: '週の開始曜日',
+						control: {
+							type: 'dropdown',
+							key: 'weekStart',
+							options: { '0': '日曜日', '1': '月曜日' },
+						},
+					},
+				],
+			},
+			{
+				type: 'group',
+				heading: 'デイリーノート連携',
+				items: [
+					{ name: '祝日を自動挿入する', desc: '祝日のデイリーノートを開いたときに祝日名を挿入します', control: { type: 'toggle', key: 'enableAutoInsert' } },
+					{ name: '挿入テキストのフォーマット', desc: '{name} が祝日名に置換されます', control: { type: 'text', key: 'insertFormat', placeholder: '> [!note] 祝日\n> {name}' } },
+					{ name: 'ステータスバーに祝日数を表示する', control: { type: 'toggle', key: 'showStatusBar' } },
+				],
+			},
+		];
+	}
+
+	getControlValue(key: string): unknown {
+		if (key === 'weekStart') return String(this.plugin.settings.weekStart);
+		return this.plugin.settings[key as keyof PluginSettings];
+	}
+
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		const settings = this.plugin.settings as unknown as Record<string, unknown>;
+		if (key === 'weekStart') {
+			settings.weekStart = value === '1' ? 1 : 0;
+		} else {
+			settings[key] = value;
+		}
+		await this.plugin.saveSettings();
+	}
+
+	/** @deprecated Obsidian 1.13.0未満向けのフォールバック */
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
