@@ -1,3 +1,4 @@
+export { getStr } from './i18n';
 import { getLanguage } from 'obsidian';
 
 export function toWareki(year: number): string {

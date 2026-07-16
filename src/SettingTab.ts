@@ -1,5 +1,7 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import type JapaneseCalendarPlugin from './main';
+import type { CalendarDisplayMode } from './CalendarView';
+import { getStr } from './utils';
 
 export class JapaneseCalendarSettingTab extends PluginSettingTab {
 	constructor(app: App, private plugin: JapaneseCalendarPlugin) {
@@ -118,6 +120,20 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.showTooltip)
 				.onChange(async v => {
 					this.plugin.settings.showTooltip = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('表示モード')
+			.setDesc('1ヶ月、3ヶ月、6ヶ月、1年から選択します')
+			.addDropdown(d => d
+				.addOption('month', getStr('modeMonth'))
+				.addOption('two-month', getStr('modeTwoMonth'))
+				.addOption('six-month', getStr('modeSixMonth'))
+				.addOption('year', getStr('modeYear'))
+				.setValue(this.plugin.settings.displayMode)
+				.onChange(async v => {
+					this.plugin.settings.displayMode = v as CalendarDisplayMode;
 					await this.plugin.saveSettings();
 				}));
 

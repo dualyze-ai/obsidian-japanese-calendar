@@ -1,19 +1,22 @@
-import { ItemView, WorkspaceLeaf, Notice, setIcon } from 'obsidian';
+import { ItemView, WorkspaceLeaf, Notice, setIcon, Menu, TFile, FuzzySuggestModal, Modal } from 'obsidian';
 import dayjs, { Dayjs } from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { HolidayManager } from './HolidayManager';
 import { DailyNoteManager } from './DailyNoteManager';
-import { toWareki, getDayLabel } from './utils';
+import { toWareki, getDayLabel, getStr } from './utils';
 import type JapaneseCalendarPlugin from './main';
 
 dayjs.extend(isSameOrBefore);
 
 export const VIEW_TYPE = 'japanese-calendar';
 
+export type CalendarDisplayMode = 'month' | 'two-month' | 'six-month' | 'year';
+
 export class CalendarView extends ItemView {
 	private current: Dayjs;
 	private holidays: HolidayManager;
 	private notes: DailyNoteManager;
+	private noteLinkManager = this.plugin.noteLinkManager;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: JapaneseCalendarPlugin) {
 		super(leaf);
@@ -32,6 +35,11 @@ export class CalendarView extends ItemView {
 
 	async onClose() {}
 
+	goToToday() {
+		this.current = dayjs();
+		this.render();
+	}
+
 	render() {
 		const root = this.containerEl.children[1] as HTMLElement;
 		root.empty();
@@ -40,42 +48,245 @@ export class CalendarView extends ItemView {
 		root.toggleClass('jhc-theme-dark', isDark);
 		root.toggleClass('jhc-theme-light', !isDark);
 
-		this.renderHeader(root);
-		this.renderDowRow(root);
+		this.renderToolbar(root);
 
-		const tooltip = root.createDiv({ cls: 'jhc-tooltip' });
-		this.renderDays(root, tooltip);
-		this.renderLegend(root);
+		const mode = this.plugin.settings.displayMode;
+		switch (mode) {
+			case 'two-month':
+				this.renderThreeMonthView(root);
+				break;
+			case 'six-month':
+				this.renderSixMonthView(root);
+				break;
+			case 'year':
+				this.renderYearView(root);
+				break;
+			case 'month':
+			default:
+				const tooltip = root.createDiv({ cls: 'jhc-tooltip' });
+				this.renderMonthView(root, this.current, { tooltip, isPrimary: true });
+				this.renderLegend(root);
+				break;
+		}
 	}
 
-	private renderHeader(root: HTMLElement) {
-		const header = root.createDiv({ cls: 'jhc-header' });
+	// ─── Toolbar ─────────────────────────────────────────────
 
-		const titleBlock = header.createDiv({ cls: 'jhc-title' });
+	private renderToolbar(root: HTMLElement) {
+		const toolbar = root.createDiv({ cls: 'jhc-toolbar' });
+
+		// Navigation group
+		const nav = toolbar.createDiv({ cls: 'jhc-nav' });
+		const prevBtn = nav.createEl('button', {
+			text: '‹',
+			attr: { 'aria-label': getStr('goToPrevious') },
+		});
+		prevBtn.onclick = () => this.navigatePrev();
+
+		const todayBtn = nav.createEl('button', {
+			text: getStr('today'),
+			cls: 'jhc-today-btn',
+			attr: { 'aria-label': getStr('goToToday') },
+		});
+		todayBtn.onclick = () => this.goToToday();
+
+		const nextBtn = nav.createEl('button', {
+			text: '›',
+			attr: { 'aria-label': getStr('goToNext') },
+		});
+		nextBtn.onclick = () => this.navigateNext();
+
+		// Title
+		this.renderTitle(toolbar);
+
+		// Display mode dropdown
+		this.renderModeDropdown(toolbar);
+
+		// Theme toggle
+		this.renderThemeToggle(toolbar);
+	}
+
+	private renderTitle(toolbar: HTMLElement) {
+		const titleBlock = toolbar.createDiv({ cls: 'jhc-title' });
+		const mode = this.plugin.settings.displayMode;
 		const year = this.current.year();
-		const month = this.current.month() + 1;
 
 		if (this.plugin.settings.showWareki) {
 			titleBlock.createDiv({ cls: 'jhc-wareki', text: toWareki(year) });
 		}
-		titleBlock.createDiv({ cls: 'jhc-month', text: `${year}年${month}月` });
 
-		const nav = header.createDiv({ cls: 'jhc-nav' });
-		nav.createEl('button', { text: '‹' }).onclick = () => {
-			this.current = this.current.subtract(1, 'month');
-			this.render();
-		};
-		nav.createEl('button', { text: '今日', cls: 'jhc-today-btn' }).onclick = () => {
-			this.current = dayjs();
-			this.render();
-		};
-		nav.createEl('button', { text: '›' }).onclick = () => {
-			this.current = this.current.add(1, 'month');
-			this.render();
-		};
+		if (mode === 'year') {
+			titleBlock.createDiv({ cls: 'jhc-month', text: `${year}年` });
+		} else if (mode === 'two-month' || mode === 'six-month') {
+			titleBlock.createDiv({ cls: 'jhc-month', text: `${year}年` });
+		} else {
+			const month = this.current.month() + 1;
+			titleBlock.createDiv({ cls: 'jhc-month', text: `${year}年${month}月` });
+		}
+	}
 
+	private renderModeDropdown(toolbar: HTMLElement) {
+		const currentMode = this.plugin.settings.displayMode;
+		const modes: Array<{ key: CalendarDisplayMode; label: string; icon: string }> = [
+			{ key: 'month', label: getStr('modeMonth'), icon: 'calendar' },
+			{ key: 'two-month', label: getStr('modeTwoMonth'), icon: 'copy' },
+			{ key: 'six-month', label: getStr('modeSixMonth'), icon: 'grid' },
+			{ key: 'year', label: getStr('modeYear'), icon: 'calendar-days' },
+		];
+		const current = modes.find(m => m.key === currentMode) ?? modes[0]!;
+
+		// ピル型ボタン
+		const pill = toolbar.createDiv({ cls: 'jhc-mode-pill' });
+		const pillBtn = pill.createEl('button', {
+			cls: 'jhc-mode-pill-btn',
+			attr: { 'aria-label': '表示モード', 'aria-haspopup': 'true' },
+		});
+		this.renderModeIcon(pillBtn, current.key);
+		pillBtn.createSpan({ text: current.label });
+		const chevron = pillBtn.createSpan({ cls: 'jhc-mode-chevron' });
+		setIcon(chevron, 'chevron-down');
+
+		// ドロップダウンメニュー
+		const menu = pill.createDiv({ cls: 'jhc-mode-menu' });
+
+		for (const m of modes) {
+			const item = menu.createDiv({
+				cls: `jhc-mode-menu-item${m.key === currentMode ? ' is-selected' : ''}`,
+				attr: { role: 'menuitem', tabindex: '0' },
+			});
+
+			// アイコン
+			const iconEl = item.createSpan({ cls: 'jhc-mode-menu-icon' });
+			this.renderModeIcon(iconEl, m.key);
+
+			// ラベル
+			item.createSpan({ cls: 'jhc-mode-menu-label', text: m.label });
+
+			// チェック
+			if (m.key === currentMode) {
+				const checkEl = item.createSpan({ cls: 'jhc-mode-menu-check' });
+				setIcon(checkEl, 'check');
+			}
+
+			item.onclick = async () => {
+				if (m.key === currentMode) return;
+				this.plugin.settings.displayMode = m.key;
+				await this.plugin.saveSettings();
+				this.removeModeMenu();
+				this.render();
+			};
+			item.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					item.onclick?.(new MouseEvent('click'));
+				}
+			});
+		}
+
+		// 開閉
+		pillBtn.onclick = (e) => {
+			e.stopPropagation();
+			const isOpen = menu.hasClass('is-open');
+			this.removeModeMenu();
+			if (!isOpen) {
+				menu.addClass('is-open');
+				// 外部クリックで閉じる
+				const closeHandler = (ev: MouseEvent) => {
+					if (!pill.contains(ev.target as Node)) {
+						this.removeModeMenu();
+						document.removeEventListener('click', closeHandler);
+					}
+				};
+				setTimeout(() => document.addEventListener('click', closeHandler), 0);
+			}
+		};
+	}
+
+	private renderModeIcon(container: HTMLElement, mode: CalendarDisplayMode) {
+		if (mode === 'six-month') {
+			// Inline SVG: small 2x2 grid icon
+			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+			svg.setAttribute('width', '16');
+			svg.setAttribute('height', '16');
+			svg.setAttribute('viewBox', '0 0 24 24');
+			svg.setAttribute('fill', 'none');
+			svg.setAttribute('stroke', 'currentColor');
+			svg.setAttribute('stroke-width', '2');
+			svg.setAttribute('stroke-linecap', 'round');
+			svg.setAttribute('stroke-linejoin', 'round');
+			const r1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			r1.setAttribute('x', '3'); r1.setAttribute('y', '3');
+			r1.setAttribute('width', '7'); r1.setAttribute('height', '7');
+			r1.setAttribute('rx', '1');
+			svg.appendChild(r1);
+			const r2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			r2.setAttribute('x', '14'); r2.setAttribute('y', '3');
+			r2.setAttribute('width', '7'); r2.setAttribute('height', '7');
+			r2.setAttribute('rx', '1');
+			svg.appendChild(r2);
+			const r3 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			r3.setAttribute('x', '3'); r3.setAttribute('y', '14');
+			r3.setAttribute('width', '7'); r3.setAttribute('height', '7');
+			r3.setAttribute('rx', '1');
+			svg.appendChild(r3);
+			const r4 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			r4.setAttribute('x', '14'); r4.setAttribute('y', '14');
+			r4.setAttribute('width', '7'); r4.setAttribute('height', '7');
+			r4.setAttribute('rx', '1');
+			svg.appendChild(r4);
+			container.appendChild(svg);
+		} else if (mode === 'two-month') {
+			// Inline SVG: two overlapping calendars
+			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+			svg.setAttribute('width', '16');
+			svg.setAttribute('height', '16');
+			svg.setAttribute('viewBox', '0 0 24 24');
+			svg.setAttribute('fill', 'none');
+			svg.setAttribute('stroke', 'currentColor');
+			svg.setAttribute('stroke-width', '2');
+			svg.setAttribute('stroke-linecap', 'round');
+			svg.setAttribute('stroke-linejoin', 'round');
+			const cal1 = [
+				['rect', { x: '3', y: '4', width: '18', height: '18', rx: '2', ry: '2' }],
+				['line', { x1: '16', y1: '2', x2: '16', y2: '6' }],
+				['line', { x1: '8', y1: '2', x2: '8', y2: '6' }],
+				['line', { x1: '3', y1: '10', x2: '21', y2: '10' }],
+			] as const;
+			for (const [tag, attrs] of cal1) {
+				const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+				for (const [k, v] of Object.entries(attrs)) {
+					el.setAttribute(k, v);
+				}
+				svg.appendChild(el);
+			}
+			// Second calendar (offset, semi-transparent)
+			const cal2 = [
+				['rect', { x: '6', y: '7', width: '18', height: '18', rx: '2', ry: '2', opacity: '0.4' }],
+				['line', { x1: '19', y1: '5', x2: '19', y2: '9', opacity: '0.4' }],
+				['line', { x1: '11', y1: '5', x2: '11', y2: '9', opacity: '0.4' }],
+				['line', { x1: '6', y1: '13', x2: '24', y2: '13', opacity: '0.4' }],
+			] as const;
+			for (const [tag, attrs] of cal2) {
+				const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+				for (const [k, v] of Object.entries(attrs)) {
+					el.setAttribute(k, v);
+				}
+				svg.appendChild(el);
+			}
+			container.appendChild(svg);
+		} else {
+			const iconName = mode === 'month' ? 'calendar' : 'calendar-days';
+			setIcon(container, iconName);
+		}
+	}
+
+	private removeModeMenu() {
+		document.querySelectorAll('.jhc-mode-menu.is-open').forEach(el => el.removeClass('is-open'));
+	}
+
+	private renderThemeToggle(toolbar: HTMLElement) {
 		const isDark = this.plugin.settings.calendarTheme === 'dark';
-		const themeBtn = nav.createEl('button', {
+		const themeBtn = toolbar.createEl('button', {
 			cls: `jhc-theme-toggle ${isDark ? 'is-dark' : 'is-light'}`,
 			attr: { 'aria-label': isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え' },
 		});
@@ -86,8 +297,30 @@ export class CalendarView extends ItemView {
 		};
 	}
 
-	private renderDowRow(root: HTMLElement) {
-		const row = root.createDiv({ cls: 'jhc-dow-grid' });
+	private navigatePrev() {
+		const mode = this.plugin.settings.displayMode;
+		if (mode === 'year') {
+			this.current = this.current.subtract(1, 'year');
+		} else {
+			this.current = this.current.subtract(1, 'month');
+		}
+		this.render();
+	}
+
+	private navigateNext() {
+		const mode = this.plugin.settings.displayMode;
+		if (mode === 'year') {
+			this.current = this.current.add(1, 'year');
+		} else {
+			this.current = this.current.add(1, 'month');
+		}
+		this.render();
+	}
+
+	// ─── Day-of-week row ──────────────────────────────────────
+
+	private renderDowRow(container: HTMLElement) {
+		const row = container.createDiv({ cls: 'jhc-dow-grid' });
 		const start = this.plugin.settings.weekStart;
 
 		for (let i = 0; i < 7; i++) {
@@ -97,40 +330,45 @@ export class CalendarView extends ItemView {
 		}
 	}
 
-	private renderDays(root: HTMLElement, tooltip: HTMLElement) {
+	// ─── Month View ────────────────────────────────────────────
+
+	private renderMonthView(root: HTMLElement, baseDate: Dayjs, opts: { tooltip?: HTMLElement; isPrimary?: boolean; compact?: boolean }) {
 		const gridCls = ['jhc-days-grid'];
 		if (!this.plugin.settings.showKichijitsu) gridCls.push('compact');
+		if (opts.compact) gridCls.push('compact-view');
 		const grid = root.createDiv({ cls: gridCls.join(' ') });
 		const today = dayjs();
 		const start = this.plugin.settings.weekStart;
 
-		const firstDay = this.current.startOf('month');
-		const lastDay = this.current.endOf('month');
+		const firstDay = baseDate.startOf('month');
+		const lastDay = baseDate.endOf('month');
 
 		const offset = (firstDay.day() - start + 7) % 7;
 
 		for (let i = offset - 1; i >= 0; i--) {
 			const d = firstDay.subtract(i + 1, 'day');
-			this.renderCell(grid, d.toDate(), true, today, tooltip);
+			this.renderCell(grid, d.toDate(), true, today, opts.tooltip, opts.compact);
 		}
 
 		for (let d = firstDay; d.isSameOrBefore(lastDay); d = d.add(1, 'day')) {
-			this.renderCell(grid, d.toDate(), false, today, tooltip);
+			this.renderCell(grid, d.toDate(), false, today, opts.tooltip, opts.compact);
 		}
 
 		const totalCells = offset + lastDay.date();
 		const remaining = (7 - (totalCells % 7)) % 7;
 		for (let i = 1; i <= remaining; i++) {
 			const d = lastDay.add(i, 'day');
-			this.renderCell(grid, d.toDate(), true, today, tooltip);
+			this.renderCell(grid, d.toDate(), true, today, opts.tooltip, opts.compact);
 		}
 	}
 
-	private renderCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Dayjs, tooltip: HTMLElement) {
+	private renderCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Dayjs, tooltip?: HTMLElement, compact?: boolean) {
 		const m = dayjs(date);
 		const dow = date.getDay();
 		const holidayName = this.holidays.getHolidayName(date);
 		const isToday = m.isSame(today, 'day');
+		const dateKey = this.noteLinkManager.dateKeyFromDate(date);
+		const links = this.noteLinkManager.getLinks(dateKey);
 
 		const classes = ['jhc-day'];
 		if (isToday) classes.push('today');
@@ -138,21 +376,23 @@ export class CalendarView extends ItemView {
 		if (dow === 0 || (holidayName && !otherMonth)) classes.push('sunday');
 		if (dow === 6) classes.push('saturday');
 		if (holidayName && !otherMonth) classes.push('holiday');
+		if (links.length > 0) classes.push('has-note-link');
+		if (compact) classes.push('compact');
 
 		const cell = grid.createDiv({ cls: classes.join(' ') });
 		cell.createDiv({ cls: 'jhc-day-num', text: String(date.getDate()) });
 
 		if (!otherMonth) {
-			if (holidayName && this.plugin.settings.showHolidayName) {
+			if (holidayName && this.plugin.settings.showHolidayName && !compact) {
 				cell.createDiv({ cls: 'jhc-holiday-name', text: holidayName });
 			}
 
-			if (this.plugin.settings.showRokuyo) {
+			if (this.plugin.settings.showRokuyo && !compact) {
 				const rokuyo = this.holidays.getRokuyo(date);
 				cell.createDiv({ cls: `jhc-rokuyo jhc-rokuyo-${rokuyo}`, text: rokuyo });
 			}
 
-			if (this.plugin.settings.showKichijitsu) {
+			if (this.plugin.settings.showKichijitsu && !compact) {
 				const kichi = this.holidays.getKichijitsu(date, {
 					tenshanichi: this.plugin.settings.showTenshanichi,
 					ichiryuManbai: this.plugin.settings.showIchiryuManbai,
@@ -168,6 +408,10 @@ export class CalendarView extends ItemView {
 				cell.createDiv({ cls: 'jhc-dot' });
 			}
 
+			if (links.length > 0) {
+				this.renderNoteLinkMarker(cell, links, dateKey);
+			}
+
 			cell.onclick = async () => {
 				try {
 					await this.notes.openOrCreate(date);
@@ -177,18 +421,13 @@ export class CalendarView extends ItemView {
 					console.error(e);
 				}
 			};
+
+			this.addContextMenu(cell, date, dateKey, links, compact);
 		}
 
-		if (this.plugin.settings.showTooltip) {
+		if (this.plugin.settings.showTooltip && tooltip) {
 			cell.addEventListener('mouseenter', () => {
-				const lines: string[] = [];
-				if (holidayName) lines.push(`🎌 ${holidayName}`);
-				lines.push(this.holidays.getRokuyo(date));
-				const kichi = this.holidays.getKichijitsu(date, { tenshanichi: true, ichiryuManbai: true, fujoju: true });
-				for (const k of kichi) {
-					lines.push(k === '不成就' ? `✗ ${k}` : `◎ ${k}`);
-				}
-
+				const lines = this.buildTooltipLines(date, links);
 				tooltip.empty();
 				for (const line of lines) {
 					tooltip.createDiv({ text: line });
@@ -198,8 +437,7 @@ export class CalendarView extends ItemView {
 				let left = cellRect.left - containerRect.left;
 				const top = cellRect.bottom - containerRect.top + 4;
 
-				// 右端からはみ出さないよう調整
-				const estimatedWidth = 120;
+				const estimatedWidth = 140;
 				if (left + estimatedWidth > containerRect.width) {
 					left = containerRect.width - estimatedWidth - 4;
 				}
@@ -216,6 +454,403 @@ export class CalendarView extends ItemView {
 		}
 	}
 
+	// ─── Three-Month View ────────────────────────────────────
+
+	private renderThreeMonthView(root: HTMLElement) {
+		const container = root.createDiv({ cls: 'jhc-three-month-grid' });
+		for (let i = 0; i < 3; i++) {
+			const d = this.current.add(i, 'month');
+			this.renderMonthSection(container, d, false);
+		}
+	}
+
+	// ─── Six-Month View ──────────────────────────────────────
+
+	private renderSixMonthView(root: HTMLElement) {
+		const container = root.createDiv({ cls: 'jhc-six-month-grid' });
+		for (let i = 0; i < 6; i++) {
+			const d = this.current.add(i, 'month');
+			this.renderMonthSection(container, d, true);
+		}
+	}
+
+	private renderMonthSection(root: HTMLElement, baseDate: Dayjs, compact: boolean) {
+		const section = root.createDiv({ cls: `jhc-month-section${compact ? ' compact' : ''}` });
+
+		const header = section.createDiv({ cls: 'jhc-month-section-header' });
+		if (this.plugin.settings.showWareki) {
+			header.createDiv({ cls: 'jhc-wareki', text: toWareki(baseDate.year()) });
+		}
+		header.createDiv({ cls: 'jhc-month', text: `${baseDate.year()}年${baseDate.month() + 1}月` });
+
+		this.renderDowRow(section);
+		const tooltip = section.createDiv({ cls: 'jhc-tooltip' });
+		this.renderMonthView(section, baseDate, { tooltip, isPrimary: false, compact });
+	}
+
+	// ─── Year View ─────────────────────────────────────────────
+
+	private renderYearView(root: HTMLElement) {
+		const grid = root.createDiv({ cls: 'jhc-year-grid' });
+		const today = dayjs();
+		const year = this.current.year();
+
+		for (let month = 0; month < 12; month++) {
+			this.renderMiniMonth(grid, dayjs(new Date(year, month, 1)), today);
+		}
+	}
+
+	private renderMiniMonth(container: HTMLElement, monthDate: Dayjs, today: Dayjs) {
+		const mm = container.createDiv({ cls: 'jhc-mini-month' });
+
+		const header = mm.createDiv({ cls: 'jhc-mini-month-header' });
+		header.createDiv({ text: `${monthDate.month() + 1}月` });
+		header.onclick = async () => {
+			this.current = monthDate;
+			this.plugin.settings.displayMode = 'month';
+			await this.plugin.saveSettings();
+			this.render();
+		};
+		header.setAttr('tabindex', '0');
+		header.setAttr('role', 'button');
+		header.addEventListener('keydown', async (e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				header.onclick?.(new MouseEvent('click'));
+			}
+		});
+
+		const dowRow = mm.createDiv({ cls: 'jhc-mini-dow-grid' });
+		const start = this.plugin.settings.weekStart;
+		for (let i = 0; i < 7; i++) {
+			const idx = (start + i) % 7;
+			const cls = ['jhc-mini-dow', idx === 0 ? 'sun' : idx === 6 ? 'sat' : ''].join(' ').trim();
+			dowRow.createDiv({ cls, text: getDayLabel(idx) });
+		}
+
+		const dayGrid = mm.createDiv({ cls: 'jhc-mini-days-grid' });
+
+		const firstDay = monthDate.startOf('month');
+		const lastDay = monthDate.endOf('month');
+		const offset = (firstDay.day() - start + 7) % 7;
+
+		for (let i = offset - 1; i >= 0; i--) {
+			const d = firstDay.subtract(i + 1, 'day');
+			this.renderMiniCell(dayGrid, d.toDate(), true, today);
+		}
+
+		for (let d = firstDay; d.isSameOrBefore(lastDay); d = d.add(1, 'day')) {
+			this.renderMiniCell(dayGrid, d.toDate(), false, today);
+		}
+
+		const totalCells = offset + lastDay.date();
+		const remaining = (7 - (totalCells % 7)) % 7;
+		for (let i = 1; i <= remaining; i++) {
+			const d = lastDay.add(i, 'day');
+			this.renderMiniCell(dayGrid, d.toDate(), true, today);
+		}
+	}
+
+	private renderMiniCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Dayjs) {
+		const m = dayjs(date);
+		const dow = date.getDay();
+		const holidayName = this.holidays.getHolidayName(date);
+		const isToday = m.isSame(today, 'day');
+		const dateKey = this.noteLinkManager.dateKeyFromDate(date);
+		const links = this.noteLinkManager.getLinks(dateKey);
+		const hasDailyNote = !otherMonth && this.notes.noteExists(date);
+
+		const classes = ['jhc-mini-day'];
+		if (isToday) classes.push('today');
+		if (otherMonth) classes.push('other-month');
+		if (dow === 0 || (holidayName && !otherMonth)) classes.push('sunday');
+		if (dow === 6) classes.push('saturday');
+		if (holidayName && !otherMonth) classes.push('holiday');
+		if (hasDailyNote) classes.push('has-daily-note');
+		if (links.length > 0) classes.push('has-note-link');
+
+		const cell = grid.createDiv({ cls: classes.join(' ') });
+
+		cell.createDiv({ cls: 'jhc-mini-day-num', text: String(date.getDate()) });
+
+		if (links.length > 0) {
+			const marker = cell.createDiv({ cls: 'jhc-note-link-marker' });
+			marker.onclick = (e) => {
+				e.stopPropagation();
+				this.openNoteLink(links);
+			};
+		}
+
+		if (!otherMonth) {
+			cell.onclick = async () => {
+				try {
+					await this.notes.openOrCreate(date);
+				} catch (e) {
+					new Notice('デイリーノートの作成に失敗しました');
+					console.error(e);
+				}
+			};
+		}
+
+		if (!otherMonth) {
+			this.addContextMenu(cell, date, dateKey, links, true);
+		}
+
+		if (this.plugin.settings.showTooltip) {
+			cell.setAttr('title', this.buildTooltipTitle(date, links));
+		}
+	}
+
+	// ─── Note Link Marker ────────────────────────────────────
+
+	private renderNoteLinkMarker(cell: HTMLElement, links: string[], _dateKey: string) {
+		const marker = cell.createDiv({ cls: 'jhc-note-link-marker' });
+		marker.setAttr('aria-label', `${getStr('tooltipLinkedNotes')}: ${links.length}`);
+		marker.onclick = (e) => {
+			e.stopPropagation();
+			this.openNoteLink(links);
+		};
+	}
+
+	private openNoteLink(links: string[]) {
+		if (links.length === 0) return;
+		if (links.length === 1) {
+			const path = links[0];
+			if (!path) return;
+			const file = this.noteLinkManager.resolveFile(path);
+			if (file) {
+				void this.app.workspace.getLeaf(false).openFile(file);
+			} else {
+				new Notice(getStr('noteNotFound'));
+			}
+			return;
+		}
+
+		const menu = new Menu();
+		for (const link of links) {
+			const file = this.noteLinkManager.resolveFile(link);
+			const label = file ? file.basename : `${link} (${getStr('noteNotFound')})`;
+			menu.addItem(item => {
+				item.setTitle(label);
+				item.onClick(async () => {
+					if (file) {
+						await this.app.workspace.getLeaf(false).openFile(file);
+					} else {
+						new Notice(getStr('noteNotFound'));
+					}
+				});
+			});
+		}
+		menu.showAtMouseEvent(new MouseEvent('contextmenu'));
+	}
+
+	// ─── Context Menu ─────────────────────────────────────────
+
+	private addContextMenu(cell: HTMLElement, date: Date, dateKey: string, links: string[], _compact?: boolean) {
+		cell.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			const menu = new Menu();
+
+			menu.addItem(item => {
+				item.setTitle(getStr('openDailyNote'));
+				item.onClick(async () => {
+					try {
+						await this.notes.openOrCreate(date);
+					} catch (err) {
+						new Notice('デイリーノートの作成に失敗しました');
+					}
+				});
+			});
+
+			menu.addItem(item => {
+				item.setTitle(getStr('linkNote'));
+				item.onClick(() => {
+					this.showNoteSelector(dateKey);
+				});
+			});
+
+			if (links.length > 0) {
+				if (links.length === 1) {
+					menu.addItem(item => {
+						item.setTitle(getStr('openLinkedNote'));
+						item.onClick(() => {
+							const path = links[0];
+							if (!path) return;
+							const file = this.noteLinkManager.resolveFile(path);
+							if (file) {
+								void this.app.workspace.getLeaf(false).openFile(file);
+							} else {
+								new Notice(getStr('noteNotFound'));
+							}
+						});
+					});
+				} else {
+					menu.addItem(item => {
+						item.setTitle(getStr('openLinkedNote'));
+						item.onClick(() => {
+							this.openNoteLink(links);
+						});
+					});
+				}
+
+				menu.addItem(item => {
+					item.setTitle(getStr('manageLinks'));
+					item.onClick(() => {
+						this.showLinkManager(dateKey, date);
+					});
+				});
+			} else {
+				menu.addItem(item => {
+					item.setTitle(getStr('manageLinks'));
+					item.onClick(() => {
+						this.showLinkManager(dateKey, date);
+					});
+				});
+			}
+
+			menu.showAtMouseEvent(e);
+		});
+	}
+
+	// ─── Note Selector ─────────────────────────────────────────
+
+	private showNoteSelector(dateKey: string) {
+		const allFiles = this.noteLinkManager.getAllMarkdownFiles();
+		const existing = this.noteLinkManager.getLinks(dateKey);
+
+		const available = allFiles.filter(f => !existing.includes(f.path));
+
+		if (available.length === 0) {
+			new Notice(getStr('noLinkedNotes'));
+			return;
+		}
+
+		const view = this;
+
+		const modal = new (class extends FuzzySuggestModal<TFile> {
+			constructor() {
+				super(view.app);
+				this.setPlaceholder(getStr('selectNote'));
+			}
+			getItems(): TFile[] {
+				return available;
+			}
+			getItemText(file: TFile): string {
+				return file.path;
+			}
+			async onChooseItem(file: TFile): Promise<void> {
+				await view.noteLinkManager.addLink(dateKey, file.path);
+				new Notice(getStr('linkAdded'));
+				view.render();
+			}
+		})();
+		modal.open();
+	}
+
+	// ─── Link Manager ──────────────────────────────────────────
+
+	private showLinkManager(dateKey: string, date: Date) {
+		const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+		const view = this;
+
+		const modal = new (class extends Modal {
+			constructor() {
+				super(view.app);
+				this.titleEl.setText(`${getStr('manageLinks')} - ${dateStr}`);
+			}
+			onOpen() {
+				const { contentEl } = this;
+				contentEl.empty();
+				const links = view.noteLinkManager.getLinks(dateKey);
+
+				if (links.length === 0) {
+					contentEl.createDiv({ text: getStr('noLinkedNotes'), cls: 'jhc-link-manager-empty' });
+				} else {
+					const list = contentEl.createDiv({ cls: 'jhc-link-manager-list' });
+					for (const link of links) {
+						const item = list.createDiv({ cls: 'jhc-link-manager-item' });
+						const file = view.noteLinkManager.resolveFile(link);
+						const label = file ? file.path : `${link} (${getStr('noteNotFound')})`;
+						const nameSpan = item.createSpan({ text: label, cls: 'jhc-link-manager-name' });
+
+						if (file) {
+							nameSpan.onclick = async () => {
+								await view.app.workspace.getLeaf(false).openFile(file);
+								this.close();
+							};
+							nameSpan.setAttr('tabindex', '0');
+							nameSpan.setAttr('role', 'button');
+						}
+
+						const unlinkBtn = item.createEl('button', {
+							text: getStr('unlink'),
+							cls: 'jhc-link-manager-unlink',
+						});
+						unlinkBtn.onclick = async () => {
+							await view.noteLinkManager.removeLink(dateKey, link);
+							new Notice(getStr('linkRemoved'));
+							this.onOpen();
+						};
+					}
+				}
+
+				const addBtn = contentEl.createEl('button', {
+					text: getStr('linkNote'),
+					cls: 'jhc-link-manager-add',
+				});
+				addBtn.onclick = () => {
+					this.close();
+					view.showNoteSelector(dateKey);
+				};
+			}
+			onClose() {
+				const { contentEl } = this;
+				contentEl.empty();
+				view.render();
+			}
+		})();
+		modal.open();
+	}
+
+	// ─── Tooltip ──────────────────────────────────────────────
+
+	private buildTooltipLines(date: Date, links: string[]): string[] {
+		const lines: string[] = [];
+		const holidayName = this.holidays.getHolidayName(date);
+		if (holidayName) lines.push(`🎌 ${holidayName}`);
+		lines.push(this.holidays.getRokuyo(date));
+		const kichi = this.holidays.getKichijitsu(date, { tenshanichi: true, ichiryuManbai: true, fujoju: true });
+		for (const k of kichi) {
+			lines.push(k === '不成就' ? `✗ ${k}` : `◎ ${k}`);
+		}
+		if (links.length > 0) {
+			for (const link of links) {
+				const file = this.noteLinkManager.resolveFile(link);
+				const name = file ? file.basename : link;
+				lines.push(`🔗 ${name}`);
+			}
+		}
+		return lines;
+	}
+
+	private buildTooltipTitle(date: Date, links: string[]): string {
+		const holidayName = this.holidays.getHolidayName(date);
+		const rokuyo = this.holidays.getRokuyo(date);
+		const parts: string[] = [];
+		if (holidayName) parts.push(holidayName);
+		parts.push(rokuyo);
+		if (links.length > 0) {
+			const names = links.map(l => {
+				const file = this.noteLinkManager.resolveFile(l);
+				return file ? file.basename : l;
+			});
+			parts.push(`📎 ${names.join(', ')}`);
+		}
+		return parts.join(' · ');
+	}
+
+	// ─── Legend ────────────────────────────────────────────────
+
 	private renderLegend(root: HTMLElement) {
 		const legend = root.createDiv({ cls: 'jhc-legend' });
 
@@ -231,6 +866,8 @@ export class CalendarView extends ItemView {
 			el.createSpan({ text: item.label });
 		}
 	}
+
+	// ─── Refresh ───────────────────────────────────────────────
 
 	refresh() {
 		this.notes = new DailyNoteManager(this.app, this.plugin.settings);

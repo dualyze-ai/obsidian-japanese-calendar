@@ -1,12 +1,13 @@
-import { Plugin, TFile } from 'obsidian';
+import { Plugin, TFile, TFolder } from 'obsidian';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import 'dayjs/locale/ja';
-import { CalendarView, VIEW_TYPE } from './CalendarView';
+import { CalendarView, VIEW_TYPE, CalendarDisplayMode } from './CalendarView';
 import { DailyNoteManager } from './DailyNoteManager';
 import { HolidayManager } from './HolidayManager';
 import { JapaneseCalendarSettingTab } from './SettingTab';
-import { detectLocale } from './utils';
+import { detectLocale, getStr } from './utils';
+import { NoteLinkManager } from './NoteLinkManager';
 
 dayjs.extend(customParseFormat);
 
@@ -27,6 +28,8 @@ export interface PluginSettings {
 	insertFormat: string;
 	showStatusBar: boolean;
 	calendarTheme: 'light' | 'dark';
+	displayMode: CalendarDisplayMode;
+	noteLinks: Record<string, string[]>;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -46,16 +49,20 @@ const DEFAULT_SETTINGS: PluginSettings = {
 	insertFormat: '> [!note] 祝日\n> {name}',
 	showStatusBar: true,
 	calendarTheme: 'light',
+	displayMode: 'month',
+	noteLinks: {},
 };
 
 export default class JapaneseCalendarPlugin extends Plugin {
 	settings: PluginSettings;
 	private statusBarItem: HTMLElement | null = null;
+	noteLinkManager: NoteLinkManager;
 
 	async onload() {
 		dayjs.locale(detectLocale());
 
 		await this.loadSettings();
+		this.noteLinkManager = new NoteLinkManager(this);
 
 		this.registerView(VIEW_TYPE, leaf => new CalendarView(leaf, this));
 
@@ -76,6 +83,58 @@ export default class JapaneseCalendarPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: 'show-month-view',
+			name: getStr('commandShowMonth'),
+			callback: async () => {
+				this.settings.displayMode = 'month';
+				await this.saveSettings();
+				await this.openCalendar();
+			},
+		});
+
+		this.addCommand({
+			id: 'show-two-month-view',
+			name: getStr('commandShowTwoMonth'),
+			callback: async () => {
+				this.settings.displayMode = 'two-month';
+				await this.saveSettings();
+				await this.openCalendar();
+			},
+		});
+
+		this.addCommand({
+			id: 'show-six-month-view',
+			name: getStr('commandShowSixMonth'),
+			callback: async () => {
+				this.settings.displayMode = 'six-month';
+				await this.saveSettings();
+				await this.openCalendar();
+			},
+		});
+
+		this.addCommand({
+			id: 'show-year-view',
+			name: getStr('commandShowYear'),
+			callback: async () => {
+				this.settings.displayMode = 'year';
+				await this.saveSettings();
+				await this.openCalendar();
+			},
+		});
+
+		this.addCommand({
+			id: 'go-to-today',
+			name: getStr('today'),
+			callback: async () => {
+				await this.openCalendar();
+				const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
+				for (const leaf of leaves) {
+					(leaf.view as CalendarView).goToToday();
+				}
+			},
+		});
+
 		if (this.settings.showStatusBar) {
 			this.statusBarItem = this.addStatusBarItem();
 			void this.updateStatusBar();
@@ -84,6 +143,26 @@ export default class JapaneseCalendarPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on('file-open', file => {
 				if (file) void this.onFileOpen(file);
+			})
+		);
+
+		// ノートrename時のリンクパス更新
+		this.registerEvent(
+			this.app.vault.on('rename', (file, oldPath) => {
+				if (file instanceof TFile && file.extension === 'md') {
+					void this.noteLinkManager.updatePath(oldPath, file.path);
+				} else if (file instanceof TFolder) {
+					void this.noteLinkManager.updateFolderPath(oldPath, file.path);
+				}
+			})
+		);
+
+		// ノートdelete時のリンク除去
+		this.registerEvent(
+			this.app.vault.on('delete', (file) => {
+				if (file instanceof TFile && file.extension === 'md') {
+					void this.noteLinkManager.removePath(file.path);
+				}
 			})
 		);
 
@@ -139,6 +218,14 @@ export default class JapaneseCalendarPlugin extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()) as PluginSettings;
+		// noteLinksの安全な初期化
+		if (typeof this.settings.noteLinks !== 'object' || this.settings.noteLinks === null) {
+			this.settings.noteLinks = {};
+		}
+		// displayModeの安全なフォールバック
+		if (!['month', 'two-month', 'six-month', 'year'].includes(this.settings.displayMode)) {
+			this.settings.displayMode = 'month';
+		}
 	}
 
 	async saveSettings() {
