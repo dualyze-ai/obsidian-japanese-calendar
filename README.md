@@ -12,23 +12,23 @@ A beautifully crafted calendar for Obsidian with full Japanese holiday support, 
 
 ## Month View · 2-Month View
 
-| ![Month View](assets/month-view.png) | ![2-Month View](assets/two-month-view.png) |
+| ![Month View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/month-view.png) | ![2-Month View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/two-month-view.png) |
 |---|---|
 
 ## 6-Month View · Year View
 
-| ![6-Month View](assets/six-month-view.png) | ![Year View](assets/year-view.png) |
+| ![6-Month View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/six-month-view.png) | ![Year View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/year-view.png) |
 |---|---|
 
 ## Link any Obsidian note to any date.
 
-![Note Links](assets/note-links.png)
+![Note Links](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/note-links.png)
 
 ---
 
 ## ✨ New in v1.2.0
 
-- **Month / 3-Month / 6-Month / Year views** — switch between four display modes
+- **Month / 2-Month / 6-Month / Year views** — switch between four display modes
 - **Note links** — associate any Markdown note with any date
 - **Responsive layouts** — every view adapts to your sidebar width
 - **Optimized for the sidebar** — no horizontal scroll, no wasted space
@@ -38,7 +38,7 @@ A beautifully crafted calendar for Obsidian with full Japanese holiday support, 
 ## Features
 
 - **Month View** — the familiar monthly calendar with holidays, rokuyo, and kichijitsu
-- **3-Month View** — a vertically stacked three-month view for short-term planning
+- **2-Month View** — a vertically stacked two-month view for short-term planning
 - **6-Month View** — compact six-month layout ideal for mid-term project tracking
 - **Year View** — a responsive 12-month grid inspired by macOS Calendar
 - **Japanese public holidays** — official Cabinet Office data, highlighted in red
@@ -63,28 +63,28 @@ A beautifully crafted calendar for Obsidian with full Japanese holiday support, 
 
 The default view. A traditional single-month calendar showing holidays, holiday names, rokuyo, kichijitsu, daily note indicators, and note link markers. Hover any date for a detailed tooltip.
 
-| ![Month View](assets/month-view.png) |
+| ![Month View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/month-view.png) |
 |---|
 
-### 3-Month View
+### 2-Month View
 
 See the current month plus the next two months stacked vertically. Navigation moves one month at a time — perfect for keeping track of upcoming events and deadlines without losing context.
 
-| ![3-Month View](assets/two-month-view.png) |
+| ![2-Month View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/two-month-view.png) |
 |---|
 
 ### 6-Month View
 
 A compact six-month view for medium-term planning. Each month section is proportionally smaller to fit comfortably in the sidebar while remaining readable.
 
-| ![6-Month View](assets/six-month-view.png) |
+| ![6-Month View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/six-month-view.png) |
 |---|
 
 ### Year View
 
 All twelve months laid out in a responsive CSS Grid. The grid automatically adjusts between 1 and 4 columns depending on the available width. Click any month name to jump to that month in Month View.
 
-| ![Year View](assets/year-view.png) |
+| ![Year View](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/year-view.png) |
 |---|
 
 ---
@@ -100,7 +100,7 @@ Link any existing Markdown note in your vault to any date on the calendar. Note 
 
 When a date has linked notes, a small dot appears below the date number in all views. Click it to open the note directly.
 
-| ![Note Links](assets/note-links.png) |
+| ![Note Links](https://raw.githubusercontent.com/dualyze-ai/obsidian-japanese-calendar/feature/v1.2.0-multiple-views-note-links/assets/note-links.png) |
 |---|
 
 ---
@@ -109,7 +109,7 @@ When a date has linked notes, a small dot appears below the date number in all v
 
 Designed for Obsidian's sidebar from the ground up. Every display mode maximizes readability even in narrow sidebars — no horizontal scroll, no overflowing cells, no clipped content.
 
-- **Month and 3-Month views** use the full sidebar width
+- **Month and 2-Month views** use the full sidebar width
 - **6-Month view** compresses proportionally without losing essential information
 - **Year view** automatically adjusts its column count based on available space
 - All views respect the sidebar's natural width and scale gracefully when resized
@@ -144,7 +144,7 @@ All commands are accessible from Obsidian's Command Palette (Cmd/Ctrl+P):
 | Command | Description |
 |---|---|
 | Japanese Calendar: Show month view | Switch to Month View |
-| Japanese Calendar: Show 3-month view | Switch to 3-Month View |
+| Japanese Calendar: Show 2-month view | Switch to 2-Month View |
 | Japanese Calendar: Show 6-month view | Switch to 6-Month View |
 | Japanese Calendar: Show year view | Switch to Year View |
 | Japanese Calendar: Go to today | Return to the current month/year |
@@ -168,7 +168,7 @@ All commands are accessible from Obsidian's Command Palette (Cmd/Ctrl+P):
 | Ichiryū Manbai-nichi | ON | Show Ichiryū Manbai-nichi (auspicious day) |
 | Fujōju-nichi | ON | Show Fujōju-nichi (inauspicious day) |
 | Show tooltip on hover | ON | Show holiday, rokuyo, and kichijitsu on hover |
-| Display mode | Month | Month, 3-Month, 6-Month, or Year |
+| Display mode | Month | Month, 2-Month, 6-Month, or Year |
 | Week start | Sunday | Sunday or Monday |
 | Auto-insert holiday callout | ON | Insert a callout into holiday daily notes |
 | Show holiday count in status bar | ON | Show this month's holiday count |
@@ -235,7 +235,7 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 ## Changelog
 
 ### v1.2.0
-- Added Month, 3-Month, 6-Month, and Year display modes
+- Added Month, 2-Month, 6-Month, and Year display modes
 - Added responsive year view with auto-grid columns
 - Added vertically stacked multi-month views optimized for the sidebar
 - Added date-to-note links for existing Markdown notes
@@ -293,7 +293,7 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 ### 表示モード
 
 - **1ヶ月表示** — 従来の月間カレンダー。祝日・六曜・吉凶日を表示
-- **3ヶ月表示** — 縦に3ヶ月を重ねた表示。前後の予定確認に最適
+- **2ヶ月表示** — 縦に2ヶ月を重ねた表示。前後の予定確認に最適
 - **6ヶ月表示** — 中期的な計画向けのコンパクトな6ヶ月表示
 - **年表示** — 12ヶ月を一覧できるレスポンシブグリッド
 
@@ -312,7 +312,7 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 | 一粒万倍日 | ON | 一粒万倍日の表示 |
 | 不成就日 | ON | 不成就日の表示 |
 | ホバーで詳細を表示する | ON | マウスオーバーで祝日・六曜・吉凶日をポップアップ |
-| 表示モード | 1ヶ月 | 1ヶ月、3ヶ月、6ヶ月、1年から選択 |
+| 表示モード | 1ヶ月 | 1ヶ月、2ヶ月、6ヶ月、1年から選択 |
 | 週の開始曜日 | 日曜日 | 日曜 or 月曜始まり |
 | 祝日を自動挿入する | ON | 祝日のノートに callout を挿入 |
 | ステータスバーに祝日数を表示する | ON | 今月の祝日数を表示 |
@@ -341,7 +341,7 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 
 ### 更新履歴
 
-**v1.2.0** — 4種類の表示モード（1ヶ月/3ヶ月/6ヶ月/1年）、ノートリンク機能、表示モード永続化、モードセレクター、コマンド追加
+**v1.2.0** — 4種類の表示モード（1ヶ月/2ヶ月/6ヶ月/1年）、ノートリンク機能、表示モード永続化、モードセレクター、コマンド追加
 
 **v1.1.4** — 言語検出を Obsidian 公式 API `getLanguage()` に変更（Obsidian 1.8.7+ 必需）
 
