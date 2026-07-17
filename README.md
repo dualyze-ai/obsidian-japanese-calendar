@@ -363,6 +363,8 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 
 ### 更新履歴
 
+**v1.3.0** — イベント管理機能（登録・編集・削除）、イベントマーカー表示、イベントポップオーバー、関連ノート対応
+
 **v1.2.0** — 4種類の表示モード（1ヶ月/2ヶ月/6ヶ月/1年）、ノートリンク機能、表示モード永続化、モードセレクター、コマンド追加
 
 **v1.1.4** — 言語検出を Obsidian 公式 API `getLanguage()` に変更（Obsidian 1.8.7+ 必需）
