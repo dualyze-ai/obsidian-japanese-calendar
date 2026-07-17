@@ -803,13 +803,12 @@ export class CalendarView extends ItemView {
 	private showEventDialog(dateKey: string, date: Date) {
 		const event = this.eventManager.getEvent(dateKey);
 		const isEdit = !!event;
-		const view = this;
 
 		const modal = new (class extends Modal {
 			titleInput: HTMLInputElement;
 			noteInput: HTMLInputElement;
 
-			constructor() {
+			constructor(private view: CalendarView) {
 				super(view.app);
 				this.titleEl.setText(isEdit ? getStr('editEvent') : getStr('addEvent'));
 			}
@@ -836,7 +835,7 @@ export class CalendarView extends ItemView {
 				const browseBtn = noteRow.createEl('button', { text: '...', cls: 'jhc-event-browse' });
 				browseBtn.onclick = () => {
 					this.close();
-					view.showNoteSelectorForEvent(dateKey, date);
+					this.view.showNoteSelectorForEvent(dateKey, date);
 				};
 
 				// Buttons
@@ -853,7 +852,7 @@ export class CalendarView extends ItemView {
 						return;
 					}
 					const note = this.noteInput.value.trim() || undefined;
-					await view.eventManager.saveEvent(dateKey, title, note);
+					await this.view.eventManager.saveEvent(dateKey, title, note);
 					new Notice(getStr('eventSaved'));
 					this.close();
 				};
@@ -864,7 +863,7 @@ export class CalendarView extends ItemView {
 						cls: 'jhc-event-delete',
 					});
 					deleteBtn.onclick = async () => {
-						await view.eventManager.deleteEvent(dateKey);
+						await this.view.eventManager.deleteEvent(dateKey);
 						new Notice(getStr('eventDeleted'));
 						this.close();
 					};
@@ -885,9 +884,9 @@ export class CalendarView extends ItemView {
 			onClose() {
 				const { contentEl } = this;
 				contentEl.empty();
-				view.render();
+				this.view.render();
 			}
-		})();
+		})(this);
 		modal.open();
 	}
 
@@ -898,34 +897,32 @@ export class CalendarView extends ItemView {
 			new Notice(getStr('noLinkedNotes'));
 			return;
 		}
-		const view = this;
 		const modal = new (class extends FuzzySuggestModal<TFile> {
-			constructor() {
+			constructor(private view: CalendarView) {
 				super(view.app);
 				this.setPlaceholder(getStr('selectNote'));
 			}
 			getItems(): TFile[] { return files; }
 			getItemText(f: TFile): string { return f.path; }
 			onChooseItem(f: TFile): void {
-				view.showEventDialogWithNote(dateKey, date, f.path);
+				this.view.showEventDialogWithNote(dateKey, date, f.path);
 			}
-		})();
+		})(this);
 		modal.open();
 	}
 
 	private showEventDialogWithNote(dateKey: string, date: Date, notePath: string) {
-		const view = this;
 		const modal = new (class extends Modal {
 			titleInput: HTMLInputElement;
 			noteInput: HTMLInputElement;
-			constructor() {
+			constructor(private view: CalendarView) {
 				super(view.app);
 				const event = view.eventManager.getEvent(dateKey);
 				this.titleEl.setText(event ? getStr('editEvent') : getStr('addEvent'));
 			}
 			onOpen() {
 				const { contentEl } = this;
-				const event = view.eventManager.getEvent(dateKey);
+				const event = this.view.eventManager.getEvent(dateKey);
 				contentEl.createEl('label', { text: getStr('eventTitle'), cls: 'jhc-event-label' });
 				this.titleInput = contentEl.createEl('input', { cls: 'jhc-event-input', attr: { type: 'text' } });
 				if (event) this.titleInput.value = event.title;
@@ -939,14 +936,14 @@ export class CalendarView extends ItemView {
 				saveBtn.onclick = async () => {
 					const t = this.titleInput.value.trim();
 					if (!t) { new Notice(getStr('eventTitleRequired')); return; }
-					await view.eventManager.saveEvent(dateKey, t, notePath);
+					await this.view.eventManager.saveEvent(dateKey, t, notePath);
 					new Notice(getStr('eventSaved'));
 					this.close();
 				};
 				if (event) {
 					const delBtn = btnRow.createEl('button', { text: getStr('deleteEvent'), cls: 'jhc-event-delete' });
 					delBtn.onclick = async () => {
-						await view.eventManager.deleteEvent(dateKey);
+						await this.view.eventManager.deleteEvent(dateKey);
 						new Notice(getStr('eventDeleted'));
 						this.close();
 					};
@@ -956,9 +953,9 @@ export class CalendarView extends ItemView {
 			onClose() {
 				const { contentEl } = this;
 				contentEl.empty();
-				view.render();
+				this.view.render();
 			}
-		})();
+		})(this);
 		modal.open();
 	}
 
