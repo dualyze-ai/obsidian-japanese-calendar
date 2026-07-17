@@ -28,6 +28,7 @@ export class CalendarView extends ItemView {
 	private holidays: HolidayManager;
 	private notes: DailyNoteManager;
 	noteLinkManager = this.plugin.noteLinkManager;
+	eventManager = this.plugin.eventManager;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: JapaneseCalendarPlugin) {
 		super(leaf);
@@ -373,8 +374,16 @@ export class CalendarView extends ItemView {
 				cell.createDiv({ cls: 'jhc-dot' });
 			}
 
-			if (links.length > 0) {
-				this.renderNoteLinkMarker(cell, links, dateKey);
+			const hasLinks = links.length > 0;
+			const hasEvent = this.eventManager.hasEvent(dateKey);
+			if (hasLinks || hasEvent) {
+				const markers = cell.createDiv({ cls: 'jhc-markers-row' });
+				if (hasLinks) {
+					this.renderNoteLinkMarker(markers, links, dateKey);
+				}
+				if (hasEvent) {
+					markers.createDiv({ cls: 'jhc-event-marker' });
+				}
 			}
 
 			cell.onclick = async () => {
@@ -456,16 +465,17 @@ export class CalendarView extends ItemView {
 	// ─── Year View ─────────────────────────────────────────────
 
 	private renderYearView(root: HTMLElement) {
+		const tooltip = this.plugin.settings.showTooltip ? root.createDiv({ cls: 'jhc-tooltip' }) : null;
 		const grid = root.createDiv({ cls: 'jhc-year-grid' });
 		const today = dayjs();
 		const year = this.current.year();
 
 		for (let month = 0; month < 12; month++) {
-			this.renderMiniMonth(grid, dayjs(new Date(year, month, 1)), today);
+			this.renderMiniMonth(grid, dayjs(new Date(year, month, 1)), today, tooltip);
 		}
 	}
 
-	private renderMiniMonth(container: HTMLElement, monthDate: Dayjs, today: Dayjs) {
+	private renderMiniMonth(container: HTMLElement, monthDate: Dayjs, today: Dayjs, tooltip: HTMLElement | null = null) {
 		const mm = container.createDiv({ cls: 'jhc-mini-month' });
 
 		const header = mm.createDiv({ cls: 'jhc-mini-month-header' });
@@ -501,22 +511,22 @@ export class CalendarView extends ItemView {
 
 		for (let i = offset - 1; i >= 0; i--) {
 			const d = firstDay.subtract(i + 1, 'day');
-			this.renderMiniCell(dayGrid, d.toDate(), true, today);
+			this.renderMiniCell(dayGrid, d.toDate(), true, today, tooltip);
 		}
 
 		for (let d = firstDay; d.isSameOrBefore(lastDay); d = d.add(1, 'day')) {
-			this.renderMiniCell(dayGrid, d.toDate(), false, today);
+			this.renderMiniCell(dayGrid, d.toDate(), false, today, tooltip);
 		}
 
 		const totalCells = offset + lastDay.date();
 		const remaining = (7 - (totalCells % 7)) % 7;
 		for (let i = 1; i <= remaining; i++) {
 			const d = lastDay.add(i, 'day');
-			this.renderMiniCell(dayGrid, d.toDate(), true, today);
+			this.renderMiniCell(dayGrid, d.toDate(), true, today, tooltip);
 		}
 	}
 
-	private renderMiniCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Dayjs) {
+	private renderMiniCell(grid: HTMLElement, date: Date, otherMonth: boolean, today: Dayjs, tooltip: HTMLElement | null = null) {
 		const m = dayjs(date);
 		const dow = date.getDay();
 		const holidayName = this.holidays.getHolidayName(date);
@@ -561,15 +571,37 @@ export class CalendarView extends ItemView {
 			this.addContextMenu(cell, date, dateKey, links, true);
 		}
 
-		if (this.plugin.settings.showTooltip) {
-			cell.setAttr('title', this.buildTooltipTitle(date, links));
+		if (tooltip) {
+			cell.addEventListener('mouseenter', () => {
+				const lines = this.buildTooltipLines(date, links);
+				tooltip.empty();
+				for (const line of lines) {
+					tooltip.createDiv({ text: line });
+				}
+				const cellRect = cell.getBoundingClientRect();
+				const containerRect = (tooltip.parentElement as HTMLElement).getBoundingClientRect();
+				let left = cellRect.left - containerRect.left;
+				const top = cellRect.bottom - containerRect.top + 4;
+				const estimatedWidth = 140;
+				if (left + estimatedWidth > containerRect.width) {
+					left = containerRect.width - estimatedWidth - 4;
+				}
+				tooltip.setCssStyles({
+					display: 'block',
+					left: `${left}px`,
+					top: `${top}px`,
+				});
+			});
+			cell.addEventListener('mouseleave', () => {
+				tooltip.setCssStyles({ display: 'none' });
+			});
 		}
 	}
 
 	// ─── Note Link Marker ────────────────────────────────────
 
-	private renderNoteLinkMarker(cell: HTMLElement, links: string[], _dateKey: string) {
-		const marker = cell.createDiv({ cls: 'jhc-note-link-marker' });
+	private renderNoteLinkMarker(container: HTMLElement, links: string[], _dateKey: string) {
+		const marker = container.createDiv({ cls: 'jhc-note-link-marker' });
 		marker.setAttr('aria-label', `${getStr('tooltipLinkedNotes')}: ${links.length}`);
 		marker.onclick = (e) => {
 			e.stopPropagation();
@@ -673,6 +705,25 @@ export class CalendarView extends ItemView {
 				});
 			}
 
+			menu.addSeparator();
+
+			const event = this.eventManager.getEvent(dateKey);
+			if (event) {
+				menu.addItem(item => {
+					item.setTitle(getStr('editEvent'));
+					item.onClick(() => {
+						this.showEventDialog(dateKey, date);
+					});
+				});
+			} else {
+				menu.addItem(item => {
+					item.setTitle(getStr('addEvent'));
+					item.onClick(() => {
+						this.showEventDialog(dateKey, date);
+					});
+				});
+			}
+
 			menu.showAtMouseEvent(e);
 		});
 	}
@@ -718,6 +769,11 @@ export class CalendarView extends ItemView {
 				lines.push(`🔗 ${name}`);
 			}
 		}
+		const dateKey = this.eventManager.dateKeyFromDate(date);
+		const event = this.eventManager.getEvent(dateKey);
+		if (event) {
+			lines.push(`📅 ${event.title}`);
+		}
 		return lines;
 	}
 
@@ -734,7 +790,176 @@ export class CalendarView extends ItemView {
 			});
 			parts.push(`📎 ${names.join(', ')}`);
 		}
+		const dateKey = this.eventManager.dateKeyFromDate(date);
+		const event = this.eventManager.getEvent(dateKey);
+		if (event) {
+			parts.push(`📅 ${event.title}`);
+		}
 		return parts.join(' · ');
+	}
+
+	// ─── Event Dialog ─────────────────────────────────────────
+
+	private showEventDialog(dateKey: string, date: Date) {
+		const event = this.eventManager.getEvent(dateKey);
+		const isEdit = !!event;
+		const view = this;
+
+		const modal = new (class extends Modal {
+			titleInput: HTMLInputElement;
+			noteInput: HTMLInputElement;
+
+			constructor() {
+				super(view.app);
+				this.titleEl.setText(isEdit ? getStr('editEvent') : getStr('addEvent'));
+			}
+
+			onOpen() {
+				const { contentEl } = this;
+
+				// Title
+				contentEl.createEl('label', { text: getStr('eventTitle'), cls: 'jhc-event-label' });
+				this.titleInput = contentEl.createEl('input', {
+					cls: 'jhc-event-input',
+					attr: { type: 'text', placeholder: getStr('eventTitlePlaceholder') },
+				});
+				if (event) this.titleInput.value = event.title;
+
+				// Note
+				contentEl.createEl('label', { text: getStr('relatedNote'), cls: 'jhc-event-label' });
+				const noteRow = contentEl.createDiv({ cls: 'jhc-event-note-row' });
+				this.noteInput = noteRow.createEl('input', {
+					cls: 'jhc-event-input',
+					attr: { type: 'text', placeholder: getStr('relatedNotePlaceholder'), readonly: 'true' },
+				});
+				if (event && event.note) this.noteInput.value = event.note;
+				const browseBtn = noteRow.createEl('button', { text: '...', cls: 'jhc-event-browse' });
+				browseBtn.onclick = () => {
+					this.close();
+					view.showNoteSelectorForEvent(dateKey, date);
+				};
+
+				// Buttons
+				const btnRow = contentEl.createDiv({ cls: 'jhc-event-buttons' });
+
+				const saveBtn = btnRow.createEl('button', {
+					text: getStr('saveEvent'),
+					cls: 'jhc-event-save',
+				});
+				saveBtn.onclick = async () => {
+					const title = this.titleInput.value.trim();
+					if (!title) {
+						new Notice(getStr('eventTitleRequired'));
+						return;
+					}
+					const note = this.noteInput.value.trim() || undefined;
+					await view.eventManager.saveEvent(dateKey, title, note);
+					new Notice(getStr('eventSaved'));
+					this.close();
+				};
+
+				if (isEdit) {
+					const deleteBtn = btnRow.createEl('button', {
+						text: getStr('deleteEvent'),
+						cls: 'jhc-event-delete',
+					});
+					deleteBtn.onclick = async () => {
+						await view.eventManager.deleteEvent(dateKey);
+						new Notice(getStr('eventDeleted'));
+						this.close();
+					};
+				}
+
+				const cancelBtn = btnRow.createEl('button', {
+					text: getStr('cancelEvent'),
+					cls: 'jhc-event-cancel',
+				});
+				cancelBtn.onclick = () => this.close();
+
+				// Enter to save
+				this.titleInput.addEventListener('keydown', (e) => {
+					if (e.key === 'Enter' && !e.isComposing) saveBtn.onclick?.(new MouseEvent('click'));
+				});
+			}
+
+			onClose() {
+				const { contentEl } = this;
+				contentEl.empty();
+				view.render();
+			}
+		})();
+		modal.open();
+	}
+
+	// Add note selector variant for events
+	private showNoteSelectorForEvent(dateKey: string, date: Date) {
+		const files = this.app.vault.getMarkdownFiles();
+		if (files.length === 0) {
+			new Notice(getStr('noLinkedNotes'));
+			return;
+		}
+		const view = this;
+		const modal = new (class extends FuzzySuggestModal<TFile> {
+			constructor() {
+				super(view.app);
+				this.setPlaceholder(getStr('selectNote'));
+			}
+			getItems(): TFile[] { return files; }
+			getItemText(f: TFile): string { return f.path; }
+			onChooseItem(f: TFile): void {
+				view.showEventDialogWithNote(dateKey, date, f.path);
+			}
+		})();
+		modal.open();
+	}
+
+	private showEventDialogWithNote(dateKey: string, date: Date, notePath: string) {
+		const view = this;
+		const modal = new (class extends Modal {
+			titleInput: HTMLInputElement;
+			noteInput: HTMLInputElement;
+			constructor() {
+				super(view.app);
+				const event = view.eventManager.getEvent(dateKey);
+				this.titleEl.setText(event ? getStr('editEvent') : getStr('addEvent'));
+			}
+			onOpen() {
+				const { contentEl } = this;
+				const event = view.eventManager.getEvent(dateKey);
+				contentEl.createEl('label', { text: getStr('eventTitle'), cls: 'jhc-event-label' });
+				this.titleInput = contentEl.createEl('input', { cls: 'jhc-event-input', attr: { type: 'text' } });
+				if (event) this.titleInput.value = event.title;
+				contentEl.createEl('label', { text: getStr('relatedNote'), cls: 'jhc-event-label' });
+				this.noteInput = contentEl.createEl('input', {
+					cls: 'jhc-event-input', attr: { type: 'text', readonly: 'true' },
+				});
+				this.noteInput.value = notePath;
+				const btnRow = contentEl.createDiv({ cls: 'jhc-event-buttons' });
+				const saveBtn = btnRow.createEl('button', { text: getStr('saveEvent'), cls: 'jhc-event-save' });
+				saveBtn.onclick = async () => {
+					const t = this.titleInput.value.trim();
+					if (!t) { new Notice(getStr('eventTitleRequired')); return; }
+					await view.eventManager.saveEvent(dateKey, t, notePath);
+					new Notice(getStr('eventSaved'));
+					this.close();
+				};
+				if (event) {
+					const delBtn = btnRow.createEl('button', { text: getStr('deleteEvent'), cls: 'jhc-event-delete' });
+					delBtn.onclick = async () => {
+						await view.eventManager.deleteEvent(dateKey);
+						new Notice(getStr('eventDeleted'));
+						this.close();
+					};
+				}
+				btnRow.createEl('button', { text: getStr('cancelEvent'), cls: 'jhc-event-cancel' }).onclick = () => this.close();
+			}
+			onClose() {
+				const { contentEl } = this;
+				contentEl.empty();
+				view.render();
+			}
+		})();
+		modal.open();
 	}
 
 	// ─── Legend ────────────────────────────────────────────────
@@ -746,6 +971,8 @@ export class CalendarView extends ItemView {
 			{ cls: 'accent', label: '今日' },
 			{ cls: 'holiday', label: '祝日' },
 			{ cls: 'saturday', label: '土曜' },
+			{ cls: 'note-link', label: 'リンク' },
+			{ cls: 'event', label: '予定' },
 		];
 
 		for (const item of items) {
