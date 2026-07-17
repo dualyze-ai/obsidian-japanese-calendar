@@ -8,8 +8,15 @@ import { HolidayManager } from './HolidayManager';
 import { JapaneseCalendarSettingTab } from './SettingTab';
 import { detectLocale, getStr } from './utils';
 import { NoteLinkManager } from './NoteLinkManager';
+import { EventManager } from './EventManager';
 
 dayjs.extend(customParseFormat);
+
+export interface CalendarEvent {
+	date: string; // YYYY-MM-DD
+	title: string;
+	note?: string; // optional vault path
+}
 
 export interface PluginSettings {
 	dailyNoteFolder: string;
@@ -30,6 +37,7 @@ export interface PluginSettings {
 	calendarTheme: 'light' | 'dark';
 	displayMode: CalendarDisplayMode;
 	noteLinks: Record<string, string[]>;
+	events: Record<string, CalendarEvent>;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -51,18 +59,21 @@ const DEFAULT_SETTINGS: PluginSettings = {
 	calendarTheme: 'light',
 	displayMode: 'month',
 	noteLinks: {},
+	events: {},
 };
 
 export default class JapaneseCalendarPlugin extends Plugin {
 	settings: PluginSettings;
 	private statusBarItem: HTMLElement | null = null;
 	noteLinkManager: NoteLinkManager;
+	eventManager: EventManager;
 
 	async onload() {
 		dayjs.locale(detectLocale());
 
 		await this.loadSettings();
 		this.noteLinkManager = new NoteLinkManager(this);
+		this.eventManager = new EventManager(this);
 
 		this.registerView(VIEW_TYPE, leaf => new CalendarView(leaf, this));
 
@@ -151,6 +162,7 @@ export default class JapaneseCalendarPlugin extends Plugin {
 			this.app.vault.on('rename', (file, oldPath) => {
 				if (file instanceof TFile && file.extension === 'md') {
 					void this.noteLinkManager.updatePath(oldPath, file.path);
+					void this.eventManager.updateNotePath(oldPath, file.path);
 				} else if (file instanceof TFolder) {
 					void this.noteLinkManager.updateFolderPath(oldPath, file.path);
 				}
@@ -162,6 +174,7 @@ export default class JapaneseCalendarPlugin extends Plugin {
 			this.app.vault.on('delete', (file) => {
 				if (file instanceof TFile && file.extension === 'md') {
 					void this.noteLinkManager.removePath(file.path);
+					void this.eventManager.removeNotePath(file.path);
 				}
 			})
 		);

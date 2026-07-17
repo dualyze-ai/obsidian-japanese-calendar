@@ -24,6 +24,18 @@ const ja: Record<string, string> = {
 	commandShowTwoMonth: '2か月表示を開く',
 	commandShowSixMonth: '6か月表示を開く',
 	commandShowYear: '年表示を開く',
+	addEvent: '予定を追加',
+	editEvent: '予定を編集',
+	deleteEvent: '削除',
+	saveEvent: '保存',
+	cancelEvent: 'キャンセル',
+	eventTitle: 'タイトル',
+	eventTitlePlaceholder: '予定のタイトルを入力',
+	eventTitleRequired: 'タイトルを入力してください',
+	relatedNote: '関連ノート（任意）',
+	relatedNotePlaceholder: 'ノートを選択',
+	eventSaved: '予定を保存しました',
+	eventDeleted: '予定を削除しました',
 };
 
 const en: Record<string, string> = {
@@ -50,6 +62,18 @@ const en: Record<string, string> = {
 	commandShowTwoMonth: 'Show 2-month view',
 	commandShowSixMonth: 'Show 6-month view',
 	commandShowYear: 'Show year view',
+	addEvent: 'Add event',
+	editEvent: 'Edit event',
+	deleteEvent: 'Delete',
+	saveEvent: 'Save',
+	cancelEvent: 'Cancel',
+	eventTitle: 'Title',
+	eventTitlePlaceholder: 'Enter event title',
+	eventTitleRequired: 'Please enter a title',
+	relatedNote: 'Related note (optional)',
+	relatedNotePlaceholder: 'Select a note',
+	eventSaved: 'Event saved',
+	eventDeleted: 'Event deleted',
 };
 
 const strings = getLanguage().toLowerCase().startsWith('ja') ? ja : en;
