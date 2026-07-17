@@ -289,7 +289,7 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 
 ## 日本語
 
-[インストール方法](#インストール方法) · [表示モード](#表示モード-1) · [ノートリンク](#ノートリンク) · [イベント管理](#イベント管理) · [設定](#設定) · [吉凶日について](#吉凶日について) · [テンプレート変数](#テンプレート変数) · [更新履歴](#更新履歴)
+[インストール方法](#インストール方法) · [表示モード](#表示モード-1) · [ノートリンク](#ノートリンク) · [イベント管理](#イベント管理) · [コマンド](#コマンド) · [デイリーノート](#デイリーノート) · [設定](#設定) · [吉凶日について](#吉凶日について) · [テンプレート変数](#テンプレート変数) · [技術スタック](#技術スタック) · [更新履歴](#更新履歴)
 
 ### インストール方法
 
@@ -328,6 +328,42 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 - **予定を削除** — ダイアログの削除ボタン
 - **関連ノート** — 任意のObsidianノートを予定に関連付け可能
 - **予定マーカー** — 全表示モードで黄色いドットを表示
+
+### コマンド
+
+コマンドパレット（Cmd/Ctrl+P）から利用可能なコマンド：
+
+| コマンド | 説明 |
+|---|---|
+| Japanese Calendar: Show month view | 月表示に切り替え |
+| Japanese Calendar: Show 2-month view | 2ヶ月表示に切り替え |
+| Japanese Calendar: Show 6-month view | 6ヶ月表示に切り替え |
+| Japanese Calendar: Show year view | 年表示に切り替え |
+| Japanese Calendar: Go to today | 現在の月/年に戻る |
+| Japanese Calendar: Open calendar | カレンダーパネルを開く |
+| Open today's daily note | 今日のデイリーノートを開く |
+
+### デイリーノート
+
+日付をクリックするとデイリーノートを作成または開きます。ファイルパスとフォーマットは設定で変更可能です：
+
+```
+Daily Notes/2026-07-20.md
+```
+
+テンプレートを指定している場合、新規ノート作成時に以下の変数が適用されます：
+
+| 変数 | 説明 |
+|---|---|
+| `{{date}}` | 設定されたフォーマットの日付 |
+| `{{date:YYYY}}` | 年 |
+| `{{date:MM}}` | 月 |
+| `{{date:DD}}` | 日 |
+| `{{holiday}}` | 祝日名（祝日以外は空） |
+| `{{rokuyo}}` | 六曜 |
+| `{{wareki}}` | 和暦（例：令和8年） |
+
+祝日が有効な場合、デイリーノートに祝日calloutが自動挿入されます。
 
 ### 設定
 
@@ -370,6 +406,13 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 | `{{holiday}}` | 祝日名（祝日以外は空） |
 | `{{rokuyo}}` | 六曜 |
 | `{{wareki}}` | 和暦（例：令和8年） |
+
+### 技術スタック
+
+- TypeScript
+- Obsidian Plugin API
+- [@holiday-jp/holiday_jp](https://github.com/holiday-jp/holiday_jp-js) — 日本の祝日データ（内閣府公式）
+- [dayjs](https://day.js.org/) — 軽量日付処理ライブラリ
 
 ### 更新履歴
 
