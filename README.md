@@ -247,6 +247,9 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 
 ## Changelog
 
+### v1.3.3
+- Fixed the "today" marker not updating when the calendar view is left open across midnight
+
 ### v1.2.0
 - Added Month, 2-Month, 6-Month, and Year display modes
 - Added responsive year view with auto-grid columns
@@ -415,6 +418,8 @@ Daily Notes/2026-07-20.md
 - [dayjs](https://day.js.org/) — 軽量日付処理ライブラリ
 
 ### 更新履歴
+
+**v1.3.3** — カレンダーを開いたまま日付をまたいでも"今日"のマークが更新されない不具合を修正
 
 **v1.3.0** — イベント管理機能（登録・編集・削除）、イベントマーカー表示、イベントポップオーバー、関連ノート対応
 
