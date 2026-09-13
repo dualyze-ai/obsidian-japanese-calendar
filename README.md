@@ -247,6 +247,9 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 
 ## Changelog
 
+### v1.3.4
+- Synced `package-lock.json` with `package.json` (fixed `npm ci` failing in release builds)
+
 ### v1.3.3
 - Fixed the "today" marker not updating when the calendar view is left open across midnight
 
@@ -418,6 +421,8 @@ Daily Notes/2026-07-20.md
 - [dayjs](https://day.js.org/) — 軽量日付処理ライブラリ
 
 ### 更新履歴
+
+**v1.3.4** — package-lock.jsonをpackage.jsonと同期（リリースビルドでnpm ciが失敗していた問題を修正）
 
 **v1.3.3** — カレンダーを開いたまま日付をまたいでも"今日"のマークが更新されない不具合を修正
 
