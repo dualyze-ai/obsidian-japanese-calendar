@@ -247,6 +247,10 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 
 ## Changelog
 
+### v1.3.7
+- CI and the release workflow now fail if `package-lock.json` is not on the same version as `package.json`
+- No changes to plugin behaviour in this release
+
 ### v1.3.6
 - Release workflow now fails early if the pushed tag does not match the version in `manifest.json`
 - `versions.json` is now updated for every release again (the version-bump script was skipping entries)
@@ -426,6 +430,8 @@ Daily Notes/2026-07-20.md
 - [dayjs](https://day.js.org/) — 軽量日付処理ライブラリ
 
 ### 更新履歴
+
+**v1.3.7** — package-lock.jsonのバージョンがpackage.jsonと一致しない場合に、CIとリリースワークフローが失敗するように変更（プラグイン本体の変更なし）
 
 **v1.3.6** — リリースワークフローにタグとmanifest.jsonのバージョン一致検証を追加、versions.jsonが更新されない不具合を修正（プラグイン本体の変更なし）
 
