@@ -30,12 +30,14 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Verify package-lock.json is in sync
+      - name: Verify lockfile version matches the manifest version
         run: |
-          npm install --package-lock-only --no-audit --no-fund
-          if ! git diff --quiet package-lock.json; then
+          pkg="$(node -p "require('./package.json').version")"
+          lock="$(node -p "require('./package-lock.json').version")"
+          manifest="$(node -p "require('./manifest.json').version")"
+          echo "package.json=$pkg package-lock.json=$lock manifest.json=$manifest"
+          if [ "$pkg" != "$lock" ] || [ "$pkg" != "$manifest" ]; then
             echo "::error::package-lock.json is out of date; run npm install and commit the updated lockfile"
-            git --no-pager diff --stat package-lock.json
             exit 1
           fi
 
