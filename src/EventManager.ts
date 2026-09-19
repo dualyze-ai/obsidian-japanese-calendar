@@ -1,4 +1,3 @@
-import { TFile } from 'obsidian';
 import type { CalendarEvent } from './main';
 import type JapaneseCalendarPlugin from './main';
 
