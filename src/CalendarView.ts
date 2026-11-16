@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { HolidayManager } from './HolidayManager';
 import { DailyNoteManager } from './DailyNoteManager';
-import { toWareki, getDayLabel, getStr, msUntilNextMidnight } from './utils';
+import { toWareki, getDayLabel, getStr, shouldRefreshTodayMarker, calendarDayKey, viewBecameVisible, TODAY_MARKER_CHECK_MS } from './utils';
 import type JapaneseCalendarPlugin from './main';
 
 dayjs.extend(isSameOrBefore);
@@ -28,14 +28,14 @@ export class CalendarView extends ItemView {
 	private holidays: HolidayManager;
 	private notes: DailyNoteManager;
 	private lastKnownToday: string;
-	private midnightTimeoutId: number | null = null;
+	private wasShown = false;
 	noteLinkManager = this.plugin.noteLinkManager;
 	eventManager = this.plugin.eventManager;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: JapaneseCalendarPlugin) {
 		super(leaf);
 		this.current = dayjs();
-		this.lastKnownToday = dayjs().format('YYYY-MM-DD');
+		this.lastKnownToday = calendarDayKey();
 		this.holidays = new HolidayManager();
 		this.notes = new DailyNoteManager(this.app, this.plugin.settings);
 	}
@@ -45,40 +45,53 @@ export class CalendarView extends ItemView {
 	getIcon() { return 'calendar-days'; }
 
 	async onOpen() {
+		// 閉じていたビューを開いたときは、その場の日付で描く。
 		this.render();
+		this.wasShown = this.containerEl.isShown();
+		this.registerTodayRefresh();
+	}
 
-		// 表示を開いたままにしていると日付が変わっても再描画されないため、
-		// 次の0時に1回だけ発火するタイマーで"今日"のマークを更新する（ポーリングはしない）
-		this.scheduleMidnightRefresh();
+	onResize(): void {
+		super.onResize();
+		// サイドバーを広げるなど、サイズが戻ったときに表示復帰を拾う。
+		this.refreshTodayMarker();
+	}
+
+	/**
+	 * 開いたまま日付が変わる場合（0時、またはスリープからの復帰）は
+	 * 1分ごとの比較でマーカーを動かす。長時間の setTimeout はスリープ中に
+	 * 進まない。再表示・フォーカス・ワークスペースの変化でも同じ比較をする。
+	 * 日付が同じなら再描画しない。表示中の月（this.current）は動かさない。
+	 */
+	private registerTodayRefresh() {
+		const refresh = () => this.refreshTodayMarker();
+
+		this.registerInterval(window.setInterval(() => this.checkDateChange(), TODAY_MARKER_CHECK_MS));
+
+		const ownerWindow = this.containerEl.ownerDocument.defaultView ?? window;
+		this.registerDomEvent(ownerWindow, 'focus', refresh);
+		this.registerDomEvent(this.containerEl.ownerDocument, 'visibilitychange', () => {
+			if (this.containerEl.ownerDocument.visibilityState === 'visible') refresh();
+		});
+
 		this.registerEvent(
 			this.app.workspace.on('active-leaf-change', (leaf) => {
-				if (leaf === this.leaf) this.checkDateChange();
+				if (leaf === this.leaf || this.containerEl.isShown()) refresh();
 			})
 		);
+		this.registerEvent(this.app.workspace.on('layout-change', refresh));
 	}
 
-	async onClose() {
-		if (this.midnightTimeoutId !== null) {
-			window.clearTimeout(this.midnightTimeoutId);
-			this.midnightTimeoutId = null;
-		}
-	}
-
-	private scheduleMidnightRefresh() {
-		if (this.midnightTimeoutId !== null) window.clearTimeout(this.midnightTimeoutId);
-		const delay = msUntilNextMidnight() + 1000; // 誤差吸収のため1秒後に発火
-		this.midnightTimeoutId = window.setTimeout(() => {
-			this.checkDateChange();
-			this.scheduleMidnightRefresh();
-		}, delay);
+	private refreshTodayMarker() {
+		const shown = this.containerEl.isShown();
+		const revealed = viewBecameVisible(this.wasShown, shown);
+		this.wasShown = shown;
+		if (revealed || shown) this.checkDateChange();
 	}
 
 	private checkDateChange() {
-		const today = dayjs().format('YYYY-MM-DD');
-		if (today !== this.lastKnownToday) {
-			this.lastKnownToday = today;
-			this.render();
-		}
+		if (!shouldRefreshTodayMarker(this.lastKnownToday)) return;
+		this.render();
 	}
 
 	goToToday() {
@@ -87,6 +100,7 @@ export class CalendarView extends ItemView {
 	}
 
 	render() {
+		this.lastKnownToday = calendarDayKey();
 		const root = this.containerEl.children[1] as HTMLElement;
 		root.empty();
 		root.addClass('japan-holidays-calendar');

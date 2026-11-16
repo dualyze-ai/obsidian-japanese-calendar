@@ -23,3 +23,28 @@ export function msUntilNextMidnight(from: Dayjs = dayjs()): number {
 	const nextMidnight = from.add(1, 'day').startOf('day');
 	return nextMidnight.diff(from);
 }
+
+/** カレンダー上の「今日」を比較するためのローカル日付キー */
+export function calendarDayKey(from: Dayjs = dayjs()): string {
+	return from.format('YYYY-MM-DD');
+}
+
+/**
+ * 前回描画した日と今の日付が違うときだけ true。
+ * スリープ中は setTimeout の残り時間が進まないため、壁時計の日付で判定する。
+ */
+export function shouldRefreshTodayMarker(lastRenderedDay: string, now: Dayjs = dayjs()): boolean {
+	return calendarDayKey(now) !== lastRenderedDay;
+}
+
+/**
+ * 開いたままのカレンダーを日付変更で更新する間隔。
+ * 0時までの一回限りの setTimeout はスリープ中に進まないので、
+ * 1分ごとに壁時計の日付を見比べる。
+ */
+export const TODAY_MARKER_CHECK_MS = 60_000;
+
+/** 非表示だったビューが再び表示された */
+export function viewBecameVisible(wasShown: boolean, isShown: boolean): boolean {
+	return isShown && !wasShown;
+}
