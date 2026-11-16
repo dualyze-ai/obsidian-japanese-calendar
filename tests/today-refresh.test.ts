@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import dayjs from 'dayjs';
-import { msUntilNextMidnight } from '../src/utils';
+import { calendarDayKey, msUntilNextMidnight, shouldRefreshTodayMarker, TODAY_MARKER_CHECK_MS } from '../src/utils';
 
 describe('msUntilNextMidnight', () => {
 	it('日中の時刻から次の0時までの残り時間を返す', () => {
@@ -32,23 +32,35 @@ describe('msUntilNextMidnight', () => {
 
 describe('日付変更検知ロジック（"今日"マークの再描画トリガー）', () => {
 	it('日付が変わっていれば再描画対象と判定する', () => {
-		const lastKnownToday = '2026-09-12';
-		const newToday = dayjs('2026-09-13T00:00:05').format('YYYY-MM-DD');
-		expect(newToday).not.toBe(lastKnownToday);
+		expect(shouldRefreshTodayMarker('2026-09-12', dayjs('2026-09-13T00:00:05'))).toBe(true);
 	});
 
 	it('同じ日のうちは再描画対象と判定しない', () => {
-		const lastKnownToday = '2026-09-12';
-		const stillToday = dayjs('2026-09-12T23:59:59').format('YYYY-MM-DD');
-		expect(stillToday).toBe(lastKnownToday);
+		expect(shouldRefreshTodayMarker('2026-09-12', dayjs('2026-09-12T23:59:59'))).toBe(false);
 	});
 
 	it('プラグインをhideして翌日showしたシナリオを再現する', () => {
-		// 前日に開いたまま放置し、最後の描画時点の日付を記録
-		const lastKnownToday = dayjs('2026-09-11T10:00:00').format('YYYY-MM-DD');
-		// 翌日ビューが再度アクティブになった（active-leaf-change）時点
+		const lastKnownToday = calendarDayKey(dayjs('2026-09-11T10:00:00'));
 		const shownAgainAt = dayjs('2026-09-12T09:00:00');
-		const today = shownAgainAt.format('YYYY-MM-DD');
-		expect(today).not.toBe(lastKnownToday); // 再描画が必要と判定されるべき
+		expect(shouldRefreshTodayMarker(lastKnownToday, shownAgainAt)).toBe(true);
+	});
+
+	it('スリープをまたいで翌朝開いたときは前日のマークを更新する', () => {
+		const paintedBeforeSleep = calendarDayKey(dayjs('2026-11-16T22:40:00'));
+		const afterWake = dayjs('2026-11-17T08:05:00');
+		expect(shouldRefreshTodayMarker(paintedBeforeSleep, afterWake)).toBe(true);
+		expect(calendarDayKey(afterWake)).toBe('2026-11-17');
+	});
+
+	it('日付判定は表示中の月を入力にしない', () => {
+		const viewedMonth = dayjs('2026-10-01');
+		const afterWake = dayjs('2026-11-17T08:05:00');
+		expect(shouldRefreshTodayMarker('2026-11-16', afterWake)).toBe(true);
+		expect(viewedMonth.format('YYYY-MM')).toBe('2026-10');
+	});
+
+	it('再チェック間隔はスリープで止まる長時間タイマーより短い', () => {
+		expect(TODAY_MARKER_CHECK_MS).toBeLessThanOrEqual(60_000);
+		expect(TODAY_MARKER_CHECK_MS).toBeGreaterThanOrEqual(1_000);
 	});
 });
