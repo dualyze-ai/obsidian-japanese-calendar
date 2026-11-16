@@ -264,6 +264,10 @@ Auspicious and inauspicious days:
 - Added 寅の日 and 巳の日 (including 己巳の日). Both are on by default.
 - Calculations cover about December 1899 through November 2100. Outside that range, Rokuyo and the lunar-based days are left blank.
 
+### v1.3.8
+- Fixed the ESLint ignore settings and removed an unused import
+- No changes to plugin behaviour in this release
+
 ### v1.3.7
 - CI and the release workflow now fail if `package-lock.json` is not on the same version as `package.json`
 - No changes to plugin behaviour in this release
@@ -273,11 +277,39 @@ Auspicious and inauspicious days:
 - `versions.json` is now updated for every release again (the version-bump script was skipping entries)
 - No changes to plugin behaviour in this release
 
+### v1.3.5
+- Added the v1.3.4 entry to the changelog
+- No changes to plugin behaviour in this release
+
 ### v1.3.4
 - Synced `package-lock.json` with `package.json` (fixed `npm ci` failing in release builds)
 
 ### v1.3.3
 - Fixed the "today" marker not updating when the calendar view is left open across midnight
+
+### v1.3.2
+- Fixed a `this` alias lint warning
+- No changes to plugin behaviour in this release
+
+### v1.3.1
+- Version bump only
+- No changes to plugin behaviour in this release
+
+### v1.3.0
+- Added event management (create, edit, delete), event markers, an event popover, and related notes
+
+### v1.2.4
+- Fixed 2-month view showing three months
+
+### v1.2.3
+- Added the declarative settings API (`getSettingDefinitions()`)
+
+### v1.2.2
+- Fixed `package-lock.json` so `npm ci` succeeds in CI
+
+### v1.2.1
+- Addressed Obsidian plugin review warnings
+- Synced `package-lock.json` to 1.2.1
 
 ### v1.2.0
 - Added Month, 2-Month, 6-Month, and Year display modes
@@ -311,11 +343,44 @@ Auspicious and inauspicious days:
 - Added Kichijitsu display (Tenshanichi, Ichiryū Manbai-nichi, Fujōju-nichi)
 - Added hover tooltips
 
+### v1.0.10
+- Updated `authorUrl` to dualyzeai.com
+
 ### v1.0.9
 - Fixed cell height shifting when holiday names wrap
 
 ### v1.0.8
 - Initial community plugin release
+
+### v1.0.7
+- Added a release description
+- No changes to plugin behaviour in this release
+
+### v1.0.6
+- Release workflow generates the release notes
+- No changes to plugin behaviour in this release
+
+### v1.0.5
+- Version bump only
+- No changes to plugin behaviour in this release
+
+### v1.0.4
+- Fixed remaining sentence-case lint errors
+
+### v1.0.3
+- Fixed sentence-case lint errors in the settings tab
+
+### v1.0.2
+- Added build provenance attestation to the release workflow
+- No changes to plugin behaviour in this release
+
+### v1.0.1
+- Added an English features section to the README
+- Removed `!important` from CSS and switched settings copy to sentence case
+- Set `minAppVersion` to 1.7.2
+
+### v1.0.0
+- Marked the community plugin as under review in the README
 
 ---
 
@@ -457,15 +522,31 @@ Daily Notes/2026-07-20.md
 
 **v1.3.9** — 六曜と吉凶日の計算を旧暦・二十四節気に合わせて修正（#6）。2025–2026年の全日（2026年11月を含む）がアラクネ暦と一致。天赦日は立春・立夏・立秋・立冬で季節が切り替わり、一粒万倍日は節月×日の十二支、不成就日は旧暦の日（8日周期）。寅の日・巳の日（己巳の日を含む）を追加し、初期設定はオン。対応範囲はおおよそ1899年12月〜2100年11月で、範囲外では六曜と旧暦に基づく吉凶日を表示しない。
 
+**v1.3.8** — ESLintの対象外指定を修正し、未使用のimportを削除（プラグイン本体の変更なし）
+
 **v1.3.7** — package-lock.jsonのバージョンがpackage.jsonと一致しない場合に、CIとリリースワークフローが失敗するように変更（プラグイン本体の変更なし）
 
 **v1.3.6** — リリースワークフローにタグとmanifest.jsonのバージョン一致検証を追加、versions.jsonが更新されない不具合を修正（プラグイン本体の変更なし）
+
+**v1.3.5** — 更新履歴にv1.3.4を追記（プラグイン本体の変更なし）
 
 **v1.3.4** — package-lock.jsonをpackage.jsonと同期（リリースビルドでnpm ciが失敗していた問題を修正）
 
 **v1.3.3** — カレンダーを開いたまま日付をまたいでも"今日"のマークが更新されない不具合を修正
 
+**v1.3.2** — `this` エイリアスの警告を修正（プラグイン本体の動作変更なし）
+
+**v1.3.1** — バージョン番号のみ更新（プラグイン本体の変更なし）
+
 **v1.3.0** — イベント管理機能（登録・編集・削除）、イベントマーカー表示、イベントポップオーバー、関連ノート対応
+
+**v1.2.4** — 2ヶ月表示が3ヶ月分になっていた不具合を修正
+
+**v1.2.3** — 宣言的Settings API（`getSettingDefinitions`）に対応
+
+**v1.2.2** — package-lock.jsonの不整合を修正し、CIのnpm ci失敗を解消
+
+**v1.2.1** — Obsidianプラグイン審査の警告を解消し、package-lock.jsonを1.2.1に同期
 
 **v1.2.0** — 4種類の表示モード（1ヶ月/2ヶ月/6ヶ月/1年）、ノートリンク機能、表示モード永続化、モードセレクター、コマンド追加
 
@@ -473,11 +554,35 @@ Daily Notes/2026-07-20.md
 
 **v1.1.3** — 曜日トークンが強制的に英語表記になる不具合修正、空フォーマット時のフォールバック修正
 
+**v1.1.2** — READMEにライト/ダークのスクリーンショットと英語セクションを追加
+
+**v1.1.1** — momentをdayjsに置き換え、ツールチップ位置を`setCssStyles`に変更
+
 **v1.1.0** — ライト/ダークモード切り替え追加
 
 **v1.0.12** — 吉凶日表示追加、ホバーツールチップ追加
 
+**v1.0.10** — authorUrlをdualyzeai.comに更新
+
+**v1.0.9** — 祝日名の折り返しでセルの高さがずれる不具合を修正
+
 **v1.0.8** — 初回公開
+
+**v1.0.7** — リリース説明を追加（プラグイン本体の変更なし）
+
+**v1.0.6** — リリースワークフローがリリースノートを生成するよう変更（プラグイン本体の変更なし）
+
+**v1.0.5** — バージョン番号のみ更新（プラグイン本体の変更なし）
+
+**v1.0.4** — 文頭大文字のlintエラーを修正
+
+**v1.0.3** — 設定画面の文頭大文字のlintエラーを修正
+
+**v1.0.2** — リリースにビルドの来歴証明を追加（プラグイン本体の変更なし）
+
+**v1.0.1** — READMEに英語の機能説明を追加、CSSの`!important`を削除、minAppVersionを1.7.2に変更
+
+**v1.0.0** — READMEにコミュニティプラグイン審査中である旨を記載
 
 ---
 
