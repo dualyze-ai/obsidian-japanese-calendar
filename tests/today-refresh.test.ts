@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import dayjs from 'dayjs';
-import { calendarDayKey, msUntilNextMidnight, shouldRefreshTodayMarker, TODAY_MARKER_CHECK_MS } from '../src/utils';
+import { calendarDayKey, msUntilNextMidnight, shouldRefreshTodayMarker, TODAY_MARKER_CHECK_MS, viewBecameVisible } from '../src/utils';
 
 describe('msUntilNextMidnight', () => {
 	it('日中の時刻から次の0時までの残り時間を返す', () => {
@@ -59,8 +59,20 @@ describe('日付変更検知ロジック（"今日"マークの再描画トリ�
 		expect(viewedMonth.format('YYYY-MM')).toBe('2026-10');
 	});
 
-	it('再チェック間隔はスリープで止まる長時間タイマーより短い', () => {
-		expect(TODAY_MARKER_CHECK_MS).toBeLessThanOrEqual(60_000);
-		expect(TODAY_MARKER_CHECK_MS).toBeGreaterThanOrEqual(1_000);
+	it('開いたままのビューは1分ごとに日付を見比べる', () => {
+		expect(TODAY_MARKER_CHECK_MS).toBe(60_000);
+	});
+
+	it('非表示から再表示されたときは日付を見比べる', () => {
+		expect(viewBecameVisible(false, true)).toBe(true);
+		expect(viewBecameVisible(true, true)).toBe(false);
+		expect(viewBecameVisible(false, false)).toBe(false);
+	});
+
+	it('別タブに隠して翌日開くと新しい今日になる', () => {
+		const lastPainted = calendarDayKey(dayjs('2026-11-16T21:00:00'));
+		const shownNextDay = dayjs('2026-11-17T09:30:00');
+		expect(viewBecameVisible(false, true)).toBe(true);
+		expect(shouldRefreshTodayMarker(lastPainted, shownNextDay)).toBe(true);
 	});
 });

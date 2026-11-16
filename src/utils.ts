@@ -38,7 +38,13 @@ export function shouldRefreshTodayMarker(lastRenderedDay: string, now: Dayjs = d
 }
 
 /**
- * 日付チェックの間隔。長時間の setTimeout はスリープで止まり、
- * 復帰後も「残り時間」だけ待ってしまう。短い間隔なら復帰後すぐ再判定できる。
+ * 開いたままのカレンダーを日付変更で更新する間隔。
+ * 0時までの一回限りの setTimeout はスリープ中に進まないので、
+ * 1分ごとに壁時計の日付を見比べる。
  */
-export const TODAY_MARKER_CHECK_MS = 30_000;
+export const TODAY_MARKER_CHECK_MS = 60_000;
+
+/** 非表示だったビューが再び表示された */
+export function viewBecameVisible(wasShown: boolean, isShown: boolean): boolean {
+	return isShown && !wasShown;
+}

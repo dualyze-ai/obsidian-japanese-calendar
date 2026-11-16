@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { HolidayManager } from './HolidayManager';
 import { DailyNoteManager } from './DailyNoteManager';
-import { toWareki, getDayLabel, getStr, shouldRefreshTodayMarker, calendarDayKey, TODAY_MARKER_CHECK_MS } from './utils';
+import { toWareki, getDayLabel, getStr, shouldRefreshTodayMarker, calendarDayKey, viewBecameVisible, TODAY_MARKER_CHECK_MS } from './utils';
 import type JapaneseCalendarPlugin from './main';
 
 dayjs.extend(isSameOrBefore);
@@ -28,6 +28,7 @@ export class CalendarView extends ItemView {
 	private holidays: HolidayManager;
 	private notes: DailyNoteManager;
 	private lastKnownToday: string;
+	private wasShown = false;
 	noteLinkManager = this.plugin.noteLinkManager;
 	eventManager = this.plugin.eventManager;
 
@@ -44,20 +45,28 @@ export class CalendarView extends ItemView {
 	getIcon() { return 'calendar-days'; }
 
 	async onOpen() {
+		// 閉じていたビューを開いたときは、その場の日付で描く。
 		this.render();
+		this.wasShown = this.containerEl.isShown();
 		this.registerTodayRefresh();
 	}
 
+	onResize(): void {
+		super.onResize();
+		// サイドバーを広げるなど、サイズが戻ったときに表示復帰を拾う。
+		this.refreshTodayMarker();
+	}
+
 	/**
-	 * 0時までの setTimeout は Mac のスリープ中に進まない。
-	 * 蓋を開けた翌朝も前日が「今日」のままになるので、短い間隔と
-	 * フォーカス／表示復帰／ワークスペースの切り替えで日付を見比べる。
+	 * 開いたまま日付が変わる場合（0時、またはスリープからの復帰）は
+	 * 1分ごとの比較でマーカーを動かす。長時間の setTimeout はスリープ中に
+	 * 進まない。再表示・フォーカス・ワークスペースの変化でも同じ比較をする。
 	 * 日付が同じなら再描画しない。表示中の月（this.current）は動かさない。
 	 */
 	private registerTodayRefresh() {
-		const refresh = () => this.checkDateChange();
+		const refresh = () => this.refreshTodayMarker();
 
-		this.registerInterval(window.setInterval(refresh, TODAY_MARKER_CHECK_MS));
+		this.registerInterval(window.setInterval(() => this.checkDateChange(), TODAY_MARKER_CHECK_MS));
 
 		const ownerWindow = this.containerEl.ownerDocument.defaultView ?? window;
 		this.registerDomEvent(ownerWindow, 'focus', refresh);
@@ -67,10 +76,17 @@ export class CalendarView extends ItemView {
 
 		this.registerEvent(
 			this.app.workspace.on('active-leaf-change', (leaf) => {
-				if (leaf === this.leaf) refresh();
+				if (leaf === this.leaf || this.containerEl.isShown()) refresh();
 			})
 		);
 		this.registerEvent(this.app.workspace.on('layout-change', refresh));
+	}
+
+	private refreshTodayMarker() {
+		const shown = this.containerEl.isShown();
+		const revealed = viewBecameVisible(this.wasShown, shown);
+		this.wasShown = shown;
+		if (revealed || shown) this.checkDateChange();
 	}
 
 	private checkDateChange() {
