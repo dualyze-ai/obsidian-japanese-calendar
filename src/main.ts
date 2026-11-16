@@ -29,6 +29,8 @@ export interface PluginSettings {
 	showTenshanichi: boolean;
 	showIchiryuManbai: boolean;
 	showFujoju: boolean;
+	showTora: boolean;
+	showMi: boolean;
 	showTooltip: boolean;
 	weekStart: 0 | 1;
 	enableAutoInsert: boolean;
@@ -51,6 +53,8 @@ const DEFAULT_SETTINGS: PluginSettings = {
 	showTenshanichi: true,
 	showIchiryuManbai: true,
 	showFujoju: true,
+	showTora: true,
+	showMi: true,
 	showTooltip: true,
 	weekStart: 0,
 	enableAutoInsert: true,

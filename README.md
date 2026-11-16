@@ -49,7 +49,7 @@ A beautifully crafted calendar for Obsidian featuring multiple calendar views, J
 - **Holiday names** — displayed inside each cell
 - **Wareki (Japanese era)** — Reiwa, Heisei, Showa in the header
 - **Rokuyo** — Taian, Butsumetsu, and the six-day cycle
-- **Kichijitsu (auspicious days)** — Tenshanichi, Ichiryū Manbai-nichi, Fujōju-nichi
+- **Kichijitsu (auspicious days)** — Tenshanichi, Ichiryū Manbai-nichi, Tora-no-hi, Mi-no-hi, Fujōju-nichi
 - **Daily notes integration** — click any date to create or open a daily note
 - **Note links** — attach any existing note to a date
 - **Note link markers** — visible in every view
@@ -176,10 +176,12 @@ All commands are accessible from Obsidian's Command Palette (Cmd/Ctrl+P):
 | Show wareki | ON | Show the Japanese era (Reiwa, etc.) in the header |
 | Show holiday name | ON | Show holiday names inside cells |
 | Show rokuyo | OFF | Show Taian, Butsumetsu, etc. |
-| Show kichijitsu | ON | Show Tenshanichi, Ichiryū Manbai-nichi, Fujōju-nichi |
+| Show kichijitsu | ON | Show Tenshanichi, Ichiryū Manbai-nichi, Tora-no-hi, Mi-no-hi, Fujōju-nichi |
 | Tenshanichi | ON | Show Tenshanichi (auspicious day) |
 | Ichiryū Manbai-nichi | ON | Show Ichiryū Manbai-nichi (auspicious day) |
 | Fujōju-nichi | ON | Show Fujōju-nichi (inauspicious day) |
+| Tora-no-hi | ON | Show Tora-no-hi (day of the Tiger) |
+| Mi-no-hi | ON | Show Mi-no-hi and Kishi-no-hi (day of the Snake) |
 | Show tooltip on hover | ON | Show holiday, rokuyo, and kichijitsu on hover |
 | Display mode | Month | Month, 2-Month, 6-Month, or Year |
 | Week start | Sunday | Sunday or Monday |
@@ -226,13 +228,14 @@ The traditional six-day cycle: Taian (大安), Shakku (赤口), Sensho (先勝),
 
 ### Kichijitsu (吉凶日)
 
-Auspicious and inauspicious days calculated from the lunar calendar:
+Auspicious and inauspicious days:
 
 | Type | Description | Cycle |
 |---|---|---|
-| Tenshanichi | 5–6 times a year. The most auspicious day | Sexagenary (60-day) cycle × season |
-| Ichiryū Manbai-nichi | Several times a month. Small things grow into great ones | Lunar month × day's earthly branch |
-| Fujōju-nichi | Several times a month. Nothing is said to succeed | Lunar month × day's earthly branch |
+| Tenshanichi | 5–6 times a year. The most auspicious day | Sexagenary (60-day) cycle × season (立春・立夏・立秋・立冬) |
+| Ichiryū Manbai-nichi | Several times a month. Small things grow into great ones | Solar-term month (節月) × day's earthly branch |
+| Tora-no-hi / Mi-no-hi | Every 12 days | Day's earthly branch (寅 / 巳). 己巳の日 is marked as well |
+| Fujōju-nichi | Several times a month. Nothing is said to succeed | Lunar month × lunar day-of-month (8-day cycle) |
 
 ---
 
@@ -246,6 +249,12 @@ Auspicious and inauspicious days calculated from the lunar calendar:
 ---
 
 ## Changelog
+
+### v1.3.9
+- Fixed Rokuyo and Kichijitsu so they follow the lunisolar calendar and the solar terms, instead of a drifting average month (#6). Every day of 2025–2026, including November 2026, now matches the [Arachne calendar](https://www.arachne.jp/onlinecalendar/taian/2026/).
+- 天赦日 changes season at 立春, 立夏, 立秋, and 立冬. 一粒万倍日 uses the solar-term month (節月) and the day's earthly branch. 不成就日 uses the lunar day on an 8-day cycle.
+- Added 寅の日 and 巳の日 (including 己巳の日). Both are on by default.
+- Calculations cover about December 1899 through November 2100. Outside that range, Rokuyo and the lunar-based days are left blank.
 
 ### v1.3.7
 - CI and the release workflow now fail if `package-lock.json` is not on the same version as `package.json`
@@ -390,10 +399,12 @@ Daily Notes/2026-07-20.md
 | 和暦を表示する | ON | ヘッダーに令和〇年を表示 |
 | 祝日名を表示する | ON | セル内に祝日名を表示 |
 | 六曜を表示する | OFF | 大安・仏滅などを表示 |
-| 吉凶日を表示する | ON | 天赦日・一粒万倍日・不成就日を表示 |
+| 吉凶日を表示する | ON | 天赦日・一粒万倍日・寅の日・巳の日・不成就日を表示 |
 | 天赦日 | ON | 天赦日の表示 |
 | 一粒万倍日 | ON | 一粒万倍日の表示 |
 | 不成就日 | ON | 不成就日の表示 |
+| 寅の日 | ON | 寅の日の表示 |
+| 巳の日 | ON | 巳の日・己巳の日の表示 |
 | ホバーで詳細を表示する | ON | マウスオーバーで祝日・六曜・吉凶日をポップアップ |
 | 表示モード | 1ヶ月 | 1ヶ月、2ヶ月、6ヶ月、1年から選択 |
 | 週の開始曜日 | 日曜日 | 日曜 or 月曜始まり |
@@ -406,9 +417,10 @@ Daily Notes/2026-07-20.md
 
 | 種類 | 説明 | 周期 |
 |---|---|---|
-| 天赦日 | 年に5〜6回。すべての罪が許される最上の大吉日 | 干支60日サイクル×季節 |
-| 一粒万倍日 | 月に数回。小さな物事が大きく育つとされる吉日 | 旧暦月×日の地支 |
-| 不成就日 | 月に数回。何事も成就しないとされる凶日 | 旧暦月×日の地支 |
+| 天赦日 | 年に5〜6回。すべての罪が許される最上の大吉日 | 干支60日サイクル×季節（立春・立夏・立秋・立冬） |
+| 一粒万倍日 | 月に数回。小さな物事が大きく育つとされる吉日 | 節月×日の十二支 |
+| 寅の日・巳の日 | 12日ごと | 日の十二支（寅・巳）。己巳の日も表示 |
+| 不成就日 | 月に数回。何事も成就しないとされる凶日 | 旧暦の月×旧暦の日（8日周期） |
 
 ### テンプレート変数
 
@@ -430,6 +442,8 @@ Daily Notes/2026-07-20.md
 - [dayjs](https://day.js.org/) — 軽量日付処理ライブラリ
 
 ### 更新履歴
+
+**v1.3.9** — 六曜と吉凶日の計算を旧暦・二十四節気に合わせて修正（#6）。2025–2026年の全日（2026年11月を含む）がアラクネ暦と一致。天赦日は立春・立夏・立秋・立冬で季節が切り替わり、一粒万倍日は節月×日の十二支、不成就日は旧暦の日（8日周期）。寅の日・巳の日（己巳の日を含む）を追加し、初期設定はオン。対応範囲はおおよそ1899年12月〜2100年11月で、範囲外では六曜と旧暦に基づく吉凶日を表示しない。
 
 **v1.3.7** — package-lock.jsonのバージョンがpackage.jsonと一致しない場合に、CIとリリースワークフローが失敗するように変更（プラグイン本体の変更なし）
 

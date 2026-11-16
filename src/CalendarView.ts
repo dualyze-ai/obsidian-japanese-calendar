@@ -389,7 +389,7 @@ export class CalendarView extends ItemView {
 
 			if (this.plugin.settings.showRokuyo && !compact) {
 				const rokuyo = this.holidays.getRokuyo(date);
-				cell.createDiv({ cls: `jhc-rokuyo jhc-rokuyo-${rokuyo}`, text: rokuyo });
+				if (rokuyo) cell.createDiv({ cls: `jhc-rokuyo jhc-rokuyo-${rokuyo}`, text: rokuyo });
 			}
 
 			if (this.plugin.settings.showKichijitsu && !compact) {
@@ -397,6 +397,8 @@ export class CalendarView extends ItemView {
 					tenshanichi: this.plugin.settings.showTenshanichi,
 					ichiryuManbai: this.plugin.settings.showIchiryuManbai,
 					fujoju: this.plugin.settings.showFujoju,
+					tora: this.plugin.settings.showTora,
+					mi: this.plugin.settings.showMi,
 				});
 				for (const label of kichi) {
 					const cls = label === '不成就' ? 'jhc-kichi kyo' : 'jhc-kichi kichi';
@@ -791,8 +793,9 @@ export class CalendarView extends ItemView {
 		const lines: string[] = [];
 		const holidayName = this.holidays.getHolidayName(date);
 		if (holidayName) lines.push(`🎌 ${holidayName}`);
-		lines.push(this.holidays.getRokuyo(date));
-		const kichi = this.holidays.getKichijitsu(date, { tenshanichi: true, ichiryuManbai: true, fujoju: true });
+		const rokuyo = this.holidays.getRokuyo(date);
+		if (rokuyo) lines.push(rokuyo);
+		const kichi = this.holidays.getKichijitsu(date, { tenshanichi: true, ichiryuManbai: true, fujoju: true, tora: true, mi: true });
 		for (const k of kichi) {
 			lines.push(k === '不成就' ? `✗ ${k}` : `◎ ${k}`);
 		}
@@ -816,7 +819,7 @@ export class CalendarView extends ItemView {
 		const rokuyo = this.holidays.getRokuyo(date);
 		const parts: string[] = [];
 		if (holidayName) parts.push(holidayName);
-		parts.push(rokuyo);
+		if (rokuyo) parts.push(rokuyo);
 		if (links.length > 0) {
 			const names = links.map(l => {
 				const file = this.noteLinkManager.resolveFile(l);

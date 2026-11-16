@@ -1,15 +1,59 @@
 import * as HolidayJp from '@holiday-jp/holiday_jp';
+import {
+	civilDate,
+	etoIndex,
+	seasonIndex,
+	setsuMonthIndex,
+	toLunar,
+	type CivilDate,
+} from './koyomi';
 
 export interface KichijitsuOptions {
 	tenshanichi: boolean;
 	ichiryuManbai: boolean;
 	fujoju: boolean;
+	tora?: boolean;
+	mi?: boolean;
 }
 
-export class HolidayManager {
-	// Calibrated so that 2024-01-01 (甲子) yields eto index 0
-	private readonly ETO_OFFSET = 27;
+const ROKUYO_NAMES: string[] = ['大安', '赤口', '先勝', '友引', '先負', '仏滅'];
 
+// 天赦日: 春=戊寅(14), 夏=甲午(30), 秋=戊申(44), 冬=甲子(0)
+const TENSHA_ETO = [14, 30, 44, 0];
+
+// 一粒万倍日: 節月 (0=寅月) × 日の十二支
+const ICHIRYU_BRANCHES: ReadonlyArray<ReadonlyArray<number>> = [
+	[1, 6],   // 寅月 丑・午
+	[2, 9],   // 卯月 寅・酉
+	[0, 3],   // 辰月 子・卯
+	[3, 4],   // 巳月 卯・辰
+	[5, 6],   // 午月 巳・午
+	[6, 9],   // 未月 午・酉
+	[0, 7],   // 申月 子・未
+	[3, 8],   // 酉月 卯・申
+	[6, 9],   // 戌月 午・酉
+	[9, 10],  // 亥月 酉・戌
+	[0, 11],  // 子月 子・亥
+	[0, 3],   // 丑月 子・卯
+];
+
+// 不成就日: 旧暦の月に対する旧暦日（8日周期）。閏月は本月に準ずる。
+const FUJOJU_DAYS: Record<number, ReadonlySet<number>> = {
+	1: new Set([3, 11, 19, 27]),
+	2: new Set([2, 10, 18, 26]),
+	3: new Set([1, 9, 17, 25]),
+	4: new Set([4, 12, 20, 28]),
+	5: new Set([5, 13, 21, 29]),
+	6: new Set([6, 14, 22, 30]),
+	7: new Set([3, 11, 19, 27]),
+	8: new Set([2, 10, 18, 26]),
+	9: new Set([1, 9, 17, 25]),
+	10: new Set([4, 12, 20, 28]),
+	11: new Set([5, 13, 21, 29]),
+	12: new Set([6, 14, 22, 30]),
+};
+
+export class HolidayManager {
 	getHolidayName(date: Date): string | null {
 		const holidays = HolidayJp.between(date, date);
 		if (holidays.length === 0) return null;
@@ -18,68 +62,40 @@ export class HolidayManager {
 	}
 
 	getRokuyo(date: Date): string {
-		const lunar = this.toLunarMonthDay(date);
-		const names: string[] = ['大安', '赤口', '先勝', '友引', '先負', '仏滅'];
-		return names[(lunar.month + lunar.day) % 6] ?? '大安';
+		const lunar = toLunar(civilDate(date));
+		if (!lunar) return '';
+		return ROKUYO_NAMES[(lunar.month + lunar.day) % 6] ?? '大安';
 	}
 
 	getKichijitsu(date: Date, opts: KichijitsuOptions): string[] {
+		const c = civilDate(date);
+		const eto = etoIndex(c.y, c.m, c.d);
+		const branch = eto % 12;
 		const result: string[] = [];
-		if (opts.tenshanichi && this.isTenshanichi(date)) result.push('天赦日');
-		if (opts.ichiryuManbai && this.isIchiryuManbai(date)) result.push('一粒万倍');
-		if (opts.fujoju && this.isFujoju(date)) result.push('不成就');
+		if (opts.tenshanichi && this.isTenshanichi(c, eto)) result.push('天赦日');
+		if (opts.ichiryuManbai && this.isIchiryuManbai(c, branch)) result.push('一粒万倍');
+		if (opts.tora && branch === 2) result.push('寅の日');
+		if (opts.mi && branch === 5) result.push('巳の日');
+		if (opts.mi && eto === 5) result.push('己巳の日');
+		if (opts.fujoju && this.isFujoju(c)) result.push('不成就');
 		return result;
 	}
 
-	private getEtoIndex(date: Date): number {
-		const jd = this.julianDay(date.getFullYear(), date.getMonth() + 1, date.getDate());
-		return (jd + this.ETO_OFFSET) % 60;
+	private isTenshanichi(c: CivilDate, eto: number): boolean {
+		const season = seasonIndex(c);
+		if (season === null) return false;
+		return eto === (TENSHA_ETO[season] ?? -1);
 	}
 
-	private isTenshanichi(date: Date): boolean {
-		const month = date.getMonth() + 1;
-		const eto = this.getEtoIndex(date);
-		// 冬(11-1月):甲子(0), 春(2-4月):戊寅(14), 夏(5-7月):甲午(30), 秋(8-10月):戊申(44)
-		if (month === 1 || month >= 11) return eto === 0;
-		if (month <= 4) return eto === 14;
-		if (month <= 7) return eto === 30;
-		return eto === 44;
+	private isIchiryuManbai(c: CivilDate, branch: number): boolean {
+		const sm = setsuMonthIndex(c);
+		if (sm === null) return false;
+		return (ICHIRYU_BRANCHES[sm] ?? []).includes(branch);
 	}
 
-	private isIchiryuManbai(date: Date): boolean {
-		const lunar = this.toLunarMonthDay(date);
-		const lm = ((lunar.month - 1) % 6) + 1;
-		const branch = this.getEtoIndex(date) % 12;
-		// 旧暦月(1-6, 7-12で折り返し) と 日の地支 の対応表
-		const table: Record<number, number[]> = {
-			1: [0, 6], 2: [2, 6], 3: [0, 3],
-			4: [3, 9], 5: [6, 9], 6: [3, 6],
-		};
-		return (table[lm] ?? []).includes(branch);
-	}
-
-	private isFujoju(date: Date): boolean {
-		const lunar = this.toLunarMonthDay(date);
-		const lm = ((lunar.month - 1) % 4) + 1;
-		const branch = this.getEtoIndex(date) % 12;
-		// 4ヶ月サイクル: 寅(2)→亥(11)→申(8)→巳(5)
-		const table: Record<number, number> = { 1: 2, 2: 11, 3: 8, 4: 5 };
-		return table[lm] === branch;
-	}
-
-	private toLunarMonthDay(date: Date): { month: number; day: number } {
-		const jd = this.julianDay(date.getFullYear(), date.getMonth() + 1, date.getDate());
-		const elapsed = jd - 2343155;
-		const month = Math.floor(elapsed / 29.530589) % 12 + 1;
-		const day = Math.floor(elapsed % 29.530589) + 1;
-		return { month, day };
-	}
-
-	private julianDay(y: number, m: number, d: number): number {
-		const a = Math.floor((14 - m) / 12);
-		const yr = y + 4800 - a;
-		const mo = m + 12 * a - 3;
-		return d + Math.floor((153 * mo + 2) / 5) + 365 * yr +
-			Math.floor(yr / 4) - Math.floor(yr / 100) + Math.floor(yr / 400) - 32045;
+	private isFujoju(c: CivilDate): boolean {
+		const lunar = toLunar(c);
+		if (!lunar) return false;
+		return FUJOJU_DAYS[lunar.month]?.has(lunar.day) ?? false;
 	}
 }

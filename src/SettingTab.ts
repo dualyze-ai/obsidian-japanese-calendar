@@ -35,10 +35,12 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 					{ name: '和暦を表示する', desc: 'ヘッダーに「令和〇年」を表示します', control: { type: 'toggle', key: 'showWareki' } },
 					{ name: '祝日名を表示する', desc: '祝日のセルに祝日名を表示します', control: { type: 'toggle', key: 'showHolidayName' } },
 					{ name: '六曜を表示する', desc: '大安・仏滅などを各セルに表示します', control: { type: 'toggle', key: 'showRokuyo' } },
-					{ name: '吉凶日を表示する', desc: '天赦日・一粒万倍日・不成就日をカレンダーに表示します', control: { type: 'toggle', key: 'showKichijitsu' } },
+					{ name: '吉凶日を表示する', desc: '天赦日・一粒万倍日・寅の日・巳の日・不成就日をカレンダーに表示します', control: { type: 'toggle', key: 'showKichijitsu' } },
 					{ name: '　天赦日', control: { type: 'toggle', key: 'showTenshanichi' } },
 					{ name: '　一粒万倍日', control: { type: 'toggle', key: 'showIchiryuManbai' } },
 					{ name: '　不成就日', control: { type: 'toggle', key: 'showFujoju' } },
+					{ name: '　寅の日', control: { type: 'toggle', key: 'showTora' } },
+					{ name: '　巳の日', desc: '己巳の日も含みます', control: { type: 'toggle', key: 'showMi' } },
 					{ name: 'ホバーで詳細を表示する', desc: '日付にマウスを乗せると祝日・六曜・吉凶日をポップアップ表示します', control: { type: 'toggle', key: 'showTooltip' } },
 					{
 						name: '表示モード',
@@ -162,7 +164,7 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('吉凶日を表示する')
-			.setDesc('天赦日・一粒万倍日・不成就日をカレンダーに表示します')
+			.setDesc('天赦日・一粒万倍日・寅の日・巳の日・不成就日をカレンダーに表示します')
 			.addToggle(t => t
 				.setValue(this.plugin.settings.showKichijitsu)
 				.onChange(async v => {
@@ -194,6 +196,25 @@ export class JapaneseCalendarSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.showFujoju)
 				.onChange(async v => {
 					this.plugin.settings.showFujoju = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('　寅の日')
+			.addToggle(t => t
+				.setValue(this.plugin.settings.showTora)
+				.onChange(async v => {
+					this.plugin.settings.showTora = v;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('　巳の日')
+			.setDesc('己巳の日も含みます')
+			.addToggle(t => t
+				.setValue(this.plugin.settings.showMi)
+				.onChange(async v => {
+					this.plugin.settings.showMi = v;
 					await this.plugin.saveSettings();
 				}));
 
