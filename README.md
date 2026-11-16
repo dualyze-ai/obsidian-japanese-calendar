@@ -250,6 +250,14 @@ Auspicious and inauspicious days:
 
 ## Changelog
 
+### v1.3.11
+- Fixed the today marker staying on the previous day after the computer sleeps or when the calendar is reopened
+- The view now rechecks the date when it is opened, shown, or focused, and every minute
+
+### v1.3.10
+- Pinned the transitive `moment` dependency (pulled in by the `obsidian` dev package) to 2.31.0 via npm overrides to resolve advisory GHSA-4p3w-j4w9-5jqw
+- No changes to plugin behaviour in this release
+
 ### v1.3.9
 - Fixed Rokuyo and Kichijitsu so they follow the lunisolar calendar and the solar terms, instead of a drifting average month (#6). Every day of 2025–2026, including November 2026, now matches the [Arachne calendar](https://www.arachne.jp/onlinecalendar/taian/2026/).
 - 天赦日 changes season at 立春, 立夏, 立秋, and 立冬. 一粒万倍日 uses the solar-term month (節月) and the day's earthly branch. 不成就日 uses the lunar day on an 8-day cycle.
@@ -442,6 +450,10 @@ Daily Notes/2026-07-20.md
 - [dayjs](https://day.js.org/) — 軽量日付処理ライブラリ
 
 ### 更新履歴
+
+**v1.3.11** — スリープ後やカレンダーを開き直したときに、"今日"のマークが前日のまま残る不具合を修正（表示時・フォーカス時と1分ごとに日付を再確認）
+
+**v1.3.10** — 依存パッケージmomentを2.31.0に固定し、脆弱性勧告GHSA-4p3w-j4w9-5jqwの警告を解消（プラグイン本体の変更なし）
 
 **v1.3.9** — 六曜と吉凶日の計算を旧暦・二十四節気に合わせて修正（#6）。2025–2026年の全日（2026年11月を含む）がアラクネ暦と一致。天赦日は立春・立夏・立秋・立冬で季節が切り替わり、一粒万倍日は節月×日の十二支、不成就日は旧暦の日（8日周期）。寅の日・巳の日（己巳の日を含む）を追加し、初期設定はオン。対応範囲はおおよそ1899年12月〜2100年11月で、範囲外では六曜と旧暦に基づく吉凶日を表示しない。
 
