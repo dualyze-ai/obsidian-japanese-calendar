@@ -252,6 +252,9 @@ Auspicious and inauspicious days:
 
 ## Changelog
 
+### v1.3.12
+- Added `{{weekday_ja}}` (月) and `{{weekday_ja_long}}` (月曜日) so a daily note created from the calendar can include that note's weekday in Japanese (#11)
+
 ### v1.3.11
 - Fixed the today marker staying on the previous day after the computer sleeps or when the calendar is reopened
 - The view now rechecks the date when it is opened, shown, or focused, and every minute
@@ -521,6 +524,8 @@ Daily Notes/2026-07-20.md
 - [dayjs](https://day.js.org/) — 軽量日付処理ライブラリ
 
 ### 更新履歴
+
+**v1.3.12** — デイリーノートのテンプレートに、ノートの日付の曜日を入れる `{{weekday_ja}}`（月）と `{{weekday_ja_long}}`（月曜日）を追加（#11）
 
 **v1.3.11** — スリープ後やカレンダーを開き直したときに、"今日"のマークが前日のまま残る不具合を修正（表示時・フォーカス時と1分ごとに日付を再確認）
 
