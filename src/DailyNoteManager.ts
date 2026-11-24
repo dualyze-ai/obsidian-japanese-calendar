@@ -1,5 +1,6 @@
 import { App, TFile } from 'obsidian';
 import dayjs from 'dayjs';
+import { applyDailyNoteTemplate } from './dailyNoteTemplate';
 import { HolidayManager } from './HolidayManager';
 
 export interface DailyNoteSettings {
@@ -87,15 +88,12 @@ export class DailyNoteManager {
 		holiday: string | null,
 		rokuyo: string | null
 	): string {
-		const m = dayjs(date);
-		return tmpl
-			.replace(/{{date}}/g, m.format(this.noteFormat()))
-			.replace(/{{date:YYYY}}/g, m.format('YYYY'))
-			.replace(/{{date:MM}}/g, m.format('MM'))
-			.replace(/{{date:DD}}/g, m.format('DD'))
-			.replace(/{{holiday}}/g, holiday ?? '')
-			.replace(/{{rokuyo}}/g, rokuyo ?? '')
-			.replace(/{{wareki}}/g, this.wareki(date.getFullYear()));
+		return applyDailyNoteTemplate(tmpl, date, {
+			noteFormat: this.noteFormat(),
+			holiday,
+			rokuyo,
+			wareki: this.wareki(date.getFullYear()),
+		});
 	}
 
 	private wareki(year: number): string {

@@ -211,6 +211,8 @@ If a template is specified, it is applied to new daily notes with the following 
 | `{{holiday}}` | Holiday name (empty if not a holiday) |
 | `{{rokuyo}}` | Rokuyo |
 | `{{wareki}}` | Japanese era (e.g. Reiwa 8) |
+| `{{weekday_ja}}` | Weekday in Japanese, short (月, 火, …), for the note's date |
+| `{{weekday_ja_long}}` | Weekday in Japanese, long (月曜日, 火曜日, …), for the note's date |
 
 When enabled, holiday callouts are automatically inserted into the daily note of any public holiday.
 
@@ -459,6 +461,8 @@ Daily Notes/2026-07-20.md
 | `{{holiday}}` | 祝日名（祝日以外は空） |
 | `{{rokuyo}}` | 六曜 |
 | `{{wareki}}` | 和暦（例：令和8年） |
+| `{{weekday_ja}}` | 曜日の短縮形（月、火など）。ノートの日付 |
+| `{{weekday_ja_long}}` | 曜日（月曜日、火曜日など）。ノートの日付 |
 
 祝日が有効な場合、デイリーノートに祝日calloutが自動挿入されます。
 
@@ -506,6 +510,8 @@ Daily Notes/2026-07-20.md
 | `{{holiday}}` | 祝日名（祝日以外は空） |
 | `{{rokuyo}}` | 六曜 |
 | `{{wareki}}` | 和暦（例：令和8年） |
+| `{{weekday_ja}}` | 曜日の短縮形（月、火など）。ノートの日付 |
+| `{{weekday_ja_long}}` | 曜日（月曜日、火曜日など）。ノートの日付 |
 
 ### 技術スタック
 

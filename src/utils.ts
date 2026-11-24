@@ -14,6 +14,17 @@ export function getDayLabel(index: number): string {
 	return labels[index] ?? '日';
 }
 
+const WEEKDAY_JA_LONG = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
+
+/** ノートの日付の曜日。界面言語に依存しない。 */
+export function weekdayJa(date: Date): string {
+	return getDayLabel(date.getDay());
+}
+
+export function weekdayJaLong(date: Date): string {
+	return WEEKDAY_JA_LONG[date.getDay()] ?? '日曜日';
+}
+
 export function detectLocale(): 'ja' | 'en' {
 	return getLanguage().toLowerCase().startsWith('ja') ? 'ja' : 'en';
 }
